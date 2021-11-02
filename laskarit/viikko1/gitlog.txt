@@ -1,0 +1,76 @@
+commit 07c027bdeebcc7c3f43e74477087f0fe5756fb8a
+Author: Oskari Ylönen <oskari@ylonen.org>
+Date:   Tue Nov 2 14:17:23 2021 +0200
+
+    Removed fil1, renamed file2 to file22
+
+ folder1/file22 | 0
+ 1 file changed, 0 insertions(+), 0 deletions(-)
+
+commit adb8ad0ebb5b2984b0b367ec5b7bf1297464a7e9
+Author: Oskari Ylönen <oskari@ylonen.org>
+Date:   Tue Nov 2 14:13:08 2021 +0200
+
+    added testfolder and files
+
+ folder1/file1 | 0
+ folder1/file2 | 0
+ folder1/file3 | 0
+ 3 files changed, 0 insertions(+), 0 deletions(-)
+
+commit 3bdf637d6308eabd10d0a6d62272c4f832932064
+Author: Oskari Ylönen <oskari@ylonen.org>
+Date:   Tue Nov 2 14:09:23 2021 +0200
+
+    modified files
+
+ foo        | 2 +-
+ foobar.txt | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 3c19dd4dea542dff02936542795603fe33c52a31
+Author: Oskari Ylönen <oskari@ylonen.org>
+Date:   Tue Nov 2 12:03:33 2021 +0200
+
+    added stuff
+
+ stuff/foofoobar | 0
+ 1 file changed, 0 insertions(+), 0 deletions(-)
+
+commit 098dc9a3105901a0923f7bed79bd7d0f9ad1d346
+Author: Oskari Ylönen <oskari@ylonen.org>
+Date:   Tue Nov 2 12:02:59 2021 +0200
+
+    changed some things
+
+ foo    | 1 +
+ foofoo | 1 +
+ 2 files changed, 2 insertions(+)
+
+commit 0154ad6765f9b9037fc75d23059013564dd52596
+Author: Oskari Ylönen <oskari@ylonen.org>
+Date:   Tue Nov 2 12:02:03 2021 +0200
+
+    added foofoo
+
+ foofoo | 0
+ 1 file changed, 0 insertions(+), 0 deletions(-)
+
+commit 2ae5446a9b773054542306cf0913cd80e9df97d9
+Author: Oskari Ylönen <oskari@ylonen.org>
+Date:   Tue Nov 2 11:59:44 2021 +0200
+
+    muutos ja lisäys
+
+ foo        | 0
+ foobar.txt | 1 +
+ 2 files changed, 1 insertion(+)
+
+commit 4c1d328f958643d11b80e741f77e5f400d4358d0
+Author: Oskari Ylönen <oskari@ylonen.org>
+Date:   Tue Nov 2 11:55:50 2021 +0200
+
+    foobar added
+
+ foobar.txt | 0
+ 1 file changed, 0 insertions(+), 0 deletions(-)
