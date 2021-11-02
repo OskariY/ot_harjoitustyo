@@ -1,6 +1,10 @@
-# <h1> Example title
+# Big example title
 
-# <h2> Example title
+## Slightly Smaller Example title
+
+links to files:
+[gitlog.txt](https://github.com/yoskari/ot_harjoitustyo/blob/main/laskarit/viikko1/gitlog.txt)
+[komentorivi.txt](https://github.com/yoskari/ot_harjoitustyo/blob/main/laskarit/viikko1/komentorivi.txt)
 
 foobar
 *foobar in italic*
