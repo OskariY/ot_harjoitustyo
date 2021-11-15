@@ -6,7 +6,7 @@
 
 [komentorivi.txt](https://github.com/yoskari/ot_harjoitustyo/blob/main/laskarit/viikko1/komentorivi.txt)
 
-[Vaatimusmäärittely](https://github.com/yoskari/ot_harjoitustyo/dokumentaatio/maarittely.md)
+[Vaatimusmäärittely](https://github.com/yoskari/ot_harjoitustyo/blob/main/dokumentaatio/maarittely.md)
 
 ## esimerkkejä markdown-formaatista
 
