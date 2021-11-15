@@ -1,13 +1,14 @@
-# Big example title
+# Ohjelmistotekniikan harjoitustyö
 
-## Slightly Smaller Example title
-
-links to files:
+## linkit tiedostoihin:
 
 [gitlog.txt](https://github.com/yoskari/ot_harjoitustyo/blob/main/laskarit/viikko1/gitlog.txt)
 
 [komentorivi.txt](https://github.com/yoskari/ot_harjoitustyo/blob/main/laskarit/viikko1/komentorivi.txt)
 
+[Vaatimusmäärittely](https://github.com/yoskari/ot_harjoitustyo/dokumentaatio/maarittely.md)
+
+## esimerkkejä markdown-formaatista
 
 foobar
 
