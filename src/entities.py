@@ -1,5 +1,6 @@
 from resources import *
 from settings import *
+from functions import *
 
 class Player():
     def __init__(self, x, y):
@@ -52,38 +53,6 @@ class Player():
 
         if self.sound_cooldown > 0:
             self.sound_cooldown -= 1
-
-        # drop collisions
-        for drop in list(drops):
-            if self.rect.colliderect(drop.rect):
-                popups.append(FadingText(self.rect.centerx, self.rect.top, "+{} x {}".format(drop.amount, drop.item)))
-                add_to_inventory(drop.item, drop.amount)
-                drops.remove(drop)
-
-        # check for collisions with mobs
-        for mob in mobs:
-            if self.rect.colliderect(mob.rect):
-                if self.punch == True:
-                    mob.health -= 1
-                    if self.dx > 0:
-                        mob.dx += self.punchpower
-                        mob.dy -= self.punchpower
-                    else:
-                        mob.dx -= self.punchpower
-                        mob.dy -= self.punchpower
-                else:
-                    self.health -= 1
-                    if self.sound_cooldown <= 0:
-                        hurt_sound.play()
-                        self.sound_cooldown = 30
-                        if mob.dx > 0:
-                            self.dx += 10
-                            self.dx -= 5
-                        else:
-                            self.dx -= 10
-                            self.dy -= 5
-
-                    break
 
         if not self.moving_right and not self.moving_left:
             if self.dx > 0:
@@ -148,9 +117,10 @@ class Player():
             else:
                 self.rect.y += 3
         else:
-            self.rect, self.collisions = move(self.rect, tiles, self.dx, self.dy, slabs)
+            self.rect, self.collisions = move(self.rect, self.dx, self.dy, tiles, slabs)
 
-    def draw(self, display):
+
+    def draw(self, display, scrollx, scrolly):
         display.blit(pygame.transform.flip(self.image, self.invert, 0), (self.rect.x-scrollx, self.rect.y-scrolly))
         if self.health < self.max_health:
             healthx = self.rect.centerx - self.max_health // 2 - scrollx

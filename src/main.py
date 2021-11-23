@@ -1,16 +1,26 @@
+"""
+This project is an attempt to clean up my previous game which was full on
+spaghetti code.
+
+"""
+
 import pygame
 import sys
 
+from settings import *
 pygame.init()
+
 screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 display = pygame.Surface((DISPLAY_WIDTH, DISPLAY_HEIGHT))
-
-from settings import *
+pygame.display.set_caption("Northlands: anti-spaghetti version")
+from resources import *
 from functions import *
 from entities import *
-from resources import *
+
 
 def main():
+    # pygame clock
+    clock = pygame.time.Clock()
 
     # object lists for updating and drawing
     mobs = []
@@ -45,8 +55,8 @@ def main():
         mousepos = (mousex, mousey)
 
         # smoothly scroll "camera" towards the player
-        scrollx += round((player.rect.centerx-scrollx-W//2) / 20)
-        scrolly += round((player.rect.centery-scrolly-H//2) / 20)
+        scrollx += round((player.rect.centerx-scrollx-DISPLAY_WIDTH//2) / 20)
+        scrolly += round((player.rect.centery-scrolly-DISPLAY_HEIGHT//2) / 20)
 
         # clear lists affected by the world generation loop
         tiles = []
@@ -54,6 +64,9 @@ def main():
         glows = []
         slabs = []
         entities = []
+
+        # draw background image
+        display.blit(background_image, (0, 0))
 
 
         # world generation
@@ -65,14 +78,8 @@ def main():
                 target_y = y - 1 + int(round(scrolly/(CHUNK_SIZE*TILE_SIZE)))
                 target_chunk = str(target_x) + ';' + str(target_y)
                 if target_chunk not in game_map:
-                    if singleplayer:
-                        game_map[target_chunk] = generate_chunk(target_x, target_y, seed)
-                    else:
-                        game_map[target_chunk] = send_data("get_chunk", (target_x, target_y), network)
+                    game_map[target_chunk] = generate_chunk(target_x, target_y, seed)
 
-                if MOB_SPAWNS == True:
-                    # in the future mobs will be spawned here
-                    pass
                 for tile in game_map[target_chunk][0]:
                     if tile[1] == "torch":
                         glows.append((tile[0][0]*TILE_SIZE-scrollx-glowradius+TILE_SIZE//2,tile[0][1]*TILE_SIZE-scrolly-glowradius+TILE_SIZE//2))
@@ -82,11 +89,13 @@ def main():
 
                     if tile[1] in ["tree1", "tree2", "tree3", "tree4"]:
                         # drawing trees
-                        display.blit(items[tile[1]]["image"],(tile[0][0]*TILE_SIZE-scrollx-tree_image.get_width() // 2 + 8,tile[0][1]*TILE_SIZE-scrolly-tree_image.get_height()+TILE_SIZE))
+                        display.blit(ITEMS[tile[1]]["image"],(tile[0][0]*TILE_SIZE-scrollx-tree_image.get_width() // 2 + 8,tile[0][1]*TILE_SIZE-scrolly-tree_image.get_height()+TILE_SIZE))
                     else:
                         # drawing everything else
-                        display.blit(items[tile[1]]["image"],(tile[0][0]*TILE_SIZE-scrollx,tile[0][1]*TILE_SIZE-scrolly))
-                    if mob_spawns:
+                        display.blit(ITEMS[tile[1]]["image"],(tile[0][0]*TILE_SIZE-scrollx,tile[0][1]*TILE_SIZE-scrolly))
+
+                    # mob spawns, when I get around to adding the mob classes
+                    if MOB_SPAWNS:
                         if tile[1] == "snowy grass":
                             if random.randint(1, 30000) == 1:
                                 if tile[0][0]*TILE_SIZE < player.rect.x - 100 or tile[0][0]*TILE_SIZE > player.rect.x + 100:
@@ -113,6 +122,42 @@ def main():
 
                     buildables.append(pygame.Rect(tile[0][0]*TILE_SIZE,tile[0][1]*TILE_SIZE,TILE_SIZE,TILE_SIZE))
 
+        # event loop
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    paused = True
+                if event.key == pygame.K_d: # move right
+                    player.moving_right = True
+                    player.invert = 0
+                if event.key == pygame.K_a: # move left
+                    player.moving_left = True
+                    player.invert = 1
+                if event.key == pygame.K_s:
+                    player.falling = True
+                if event.key == pygame.K_w and player.jumps > 0: # jump
+                    player.dy = -player.jump_power
+                    player.jumps -= 1
+                    jump_sound.play()
+            if event.type == pygame.KEYUP:
+                    if event.key == pygame.K_d:
+                        player.moving_right = False
+                    if event.key == pygame.K_a:
+                        player.moving_left = False
+
+
+        # drawing and updating game entities like the player
+        player.draw(display, scrollx, scrolly)
+        player.update(scrollx, scrolly, tiles, mobs, drops, popups, slabs)
+
+        screen.blit(pygame.transform.scale(display, (WINDOW_WIDTH, WINDOW_HEIGHT)), (0, 0))
+        pygame.display.update()
+        clock.tick(FPS)
+
 
 if __name__ == "__main__":
+    pygame.mixer.music.play(-1)
     main()
