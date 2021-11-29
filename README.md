@@ -21,7 +21,10 @@ Peli on kirjoitettu Pythonilla ja toteutettu käyttäen pygame-grafiikkakirjasto
 
 [Arkkitehtuuri](https://github.com/yoskari/ot_harjoitustyo/blob/main/dokumentaatio/arkkitehtuuri.md)
 
-[viikko5 release](https://github.com/yoskari/ot_harjoitustyo/releases/tag/viikko5)
+[viikko 5 release](https://github.com/yoskari/ot_harjoitustyo/releases/tag/viikko5)
+
+[viikko 6 release](https://github.com/yoskari/ot_harjoitustyo/releases/tag/viikko6)
+ ( bugi: peli pitää ajaa kerran ennen testausta )
 
 ## Asennus
 1. Asenna riippuvuudet komennolla:
