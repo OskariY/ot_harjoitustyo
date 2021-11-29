@@ -1,6 +1,6 @@
 import random
 import pygame
-from resources import polarbear_images
+from resources import polarbear_images, zombie_walking, skeleton_images
 from entities.drop import DroppedItem
 from entities.particle import Particle
 from settings import TILE_SIZE, DISPLAY_WIDTH, DISPLAY_HEIGHT, GREEN, RED
@@ -18,6 +18,9 @@ class WalkingMob():
         if mobtype == "skeleton":
             self.images = skeleton_images
             self.anim_repeat = 20
+        if mobtype == "zombie":
+            self.images = zombie_walking
+            self.anim_repeat = 15
         self.image = self.images[0]
         self.rect = self.image.get_rect()
         self.rect.x = x
@@ -85,11 +88,17 @@ class WalkingMob():
                 if self.rect.centerx < player.rect.centerx - TILE_SIZE:
                     if self.dx < self.speed:
                         self.dx += 0.5
-                    self.inverse = 1
+                    if self.mobtype == "bear":
+                        self.inverse = 1
+                    else:
+                        self.inverse = 0
                 elif self.rect.centerx > player.rect.centerx + TILE_SIZE:
                     if self.dx > -self.speed:
                         self.dx -= 0.5
-                    self.inverse = 0
+                    if self.mobtype == "bear":
+                        self.inverse = 0
+                    else:
+                        self.inverse = 1
             # hard speed gap
             if self.dx > self.max_speed:
                 self.dx = self.max_speed

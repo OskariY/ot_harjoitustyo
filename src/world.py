@@ -5,7 +5,8 @@ from settings import BLACK, WHITE, GRAY, BROWN, GRASSGREEN, TILE_SIZE, \
                      CHUNK_SIZE, DISPLAY_WIDTH, DISPLAY_HEIGHT, \
                      MOB_SPAWNS, \
                      MOB_LIMIT
-from resources import ITEMS, break_sound, build_sound, background_image, tree_image
+from resources import ITEMS, break_sound, build_sound, night_background_image, background_image, \
+                      tree_image, glowradius, glow
 from entities.drop import DroppedItem
 from entities.particle import Particle
 from entities.walkingmob import WalkingMob
@@ -40,6 +41,8 @@ class World():
         # variables for scrolling the world
         self.scrollx = 0
         self.scrolly = 0
+        self.tod = 0 # time of day
+        self.is_night = False
 
         self.current_biome = 1
 
@@ -76,6 +79,8 @@ class World():
         # draw background image
         if self.current_biome == 3:
             display.fill(BLACK)
+        elif self.is_night:
+            display.blit(night_background_image, (0, 0))
         else:
             display.blit(background_image, (0, 0))
 
@@ -98,15 +103,16 @@ class World():
 
                     # bird spawns
                     if len(self.game_map[target_chunk][0]) == 0 and self.game_map[target_chunk][1] == 2:
-                        if random.randint(1, 10000) == 1 and len(self.mobs) < MOB_LIMIT:
+                        if random.randint(1, 30000) == 1 and len(self.mobs) < MOB_LIMIT:
                             bird = FlyingMob(target_x*TILE_SIZE*CHUNK_SIZE, target_y*TILE_SIZE*CHUNK_SIZE)
                             self.mobs.append(bird)
                             self.entities.append(bird)
 
                 # go through all tiles in the target chunk
                 for tile in self.game_map[target_chunk][0]:
-#                    if tile[1] == "torch":
-#                        glows.append((tile[0][0]*TILE_SIZE-scrollx-glowradius+TILE_SIZE//2,tile[0][1]*TILE_SIZE-scrolly-glowradius+TILE_SIZE//2))
+                    if tile[1] == "torch":
+                        self.glows.append((tile[0][0]*TILE_SIZE-self.scrollx-glowradius+TILE_SIZE//2,
+                                           tile[0][1]*TILE_SIZE-self.scrolly-glowradius+TILE_SIZE//2))
 
                     if tile[1] == "slab":
                         self.slabs.append(pygame.Rect(tile[0][0]*TILE_SIZE,
@@ -127,19 +133,21 @@ class World():
 
                     # mob spawns
                     if MOB_SPAWNS:
-                        if tile[1] == "snowy grass":
+                        if tile[1] in ["snowy grass", "grass"]:
                             if random.randint(1, 30000) == 1 and len(self.mobs) < MOB_LIMIT:
-                                if tile[0][0]*TILE_SIZE < player.rect.x - 100 or tile[0][0]*TILE_SIZE > player.rect.x + 100:
-                                    bear = WalkingMob(tile[0][0]*TILE_SIZE, tile[0][1]*TILE_SIZE-48)
-                                    self.mobs.append(bear)
-                                    self.entities.append(bear)
-
-                        #if is_night == True:
-                        #    if tile[1] in ["snowy grass", "grass"]:
-                        #        if random.randint(1, 10000) == 1:
-                        #            if tile[0][0]*TILE_SIZE < player.rect.x - 100 or tile[0][0]*TILE_SIZE > player.rect.x + 100:
-                        #                print("skeleton spawned, mobs: {}".format(len(mobs)))
-                        #                mobs.append(WalkingMob(tile[0][0]*TILE_SIZE, tile[0][1]*TILE_SIZE-48, 2))
+                                mobtype = ""
+                                if self.is_night:
+                                    mobtype = "zombie"
+                                elif self.current_biome == 2:
+                                    mobtype = "bear"
+                                if mobtype != "":
+                                    if tile[0][0]*TILE_SIZE < player.rect.x - 100 \
+                                            or tile[0][0]*TILE_SIZE > player.rect.x + 100:
+                                        self.console.log(f"{mobtype} spawned, mobs: {len(self.mobs)}")
+                                        bear = WalkingMob(tile[0][0]*TILE_SIZE,
+                                                          tile[0][1]*TILE_SIZE-48, mobtype)
+                                        self.mobs.append(bear)
+                                        self.entities.append(bear)
 
                     # physics
                     if tile[1] in ["stone","dirt","grass","snowy grass","plank","rock","coal block","slab"]:

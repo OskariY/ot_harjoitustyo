@@ -31,6 +31,7 @@ def save_game(name, world, inventory, player):
         "mob_coords": [],
         "worm_coords": [],
         "inventory": inventory.inventory,
+        "tod": world.tod,
 
         # world generation parameters
         "seed": world.seed
@@ -58,6 +59,7 @@ def create_world(name):
         "worm_coords": [],
         "drops": [],
         "inventory": [],
+        "tod": 95000,
 
         # world generation parameters
         "seed": random.randint(-9999999,9999999),

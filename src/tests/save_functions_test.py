@@ -5,6 +5,7 @@ from world import World
 from inventory import Inventory
 from entities.player import Player
 from entities.walkingmob import WalkingMob
+from entities.flyingmob import FlyingMob
 from entities.caveworm import Worm
 from save_functions import *
 from console import Console
@@ -29,6 +30,7 @@ class TestSaveFunctions(unittest.TestCase):
             "worm_coords": [],
             "drops": [],
             "inventory": [],
+            "tod": 95000,
 
             # world generation parameters
             "seed": random.randint(-9999999,9999999),
@@ -45,6 +47,8 @@ class TestSaveFunctions(unittest.TestCase):
 
     def test_save_game(self):
         self.world.mobs.append(WalkingMob(0, 0))
+        self.world.mobs.append(WalkingMob(0, 0, "zombie"))
+        self.world.mobs.append(FlyingMob(0, 0))
         self.world.worms.append(Worm(0, 0))
         save_game("unittest_test", self.world, self.inventory, self.player)
         target = {
@@ -58,6 +62,7 @@ class TestSaveFunctions(unittest.TestCase):
             "mob_coords": [],
             "worm_coords": [],
             "inventory": self.inventory.inventory,
+            "tod": self.world.tod,
 
             # world generation parameters
             "seed": self.world.seed

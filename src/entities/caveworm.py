@@ -50,7 +50,7 @@ class Worm():
         Handles movement of all the worm parts, aggroing to the player and health
         """
         # despawn if player is too far
-        if abs(player.rect.x - self.head_rect.x) > 1000 and abs(player.rect.y - self.head_rect.y) > 1000:
+        if abs(player.rect.x - self.head_rect.x) > 500 and abs(player.rect.y - self.head_rect.y) > 500:
             world.worms.remove(self)
         # death
         if self.health <= 0:
@@ -70,10 +70,9 @@ class Worm():
                     player.dx -= 10
                     player.dy -= 5
 
-            if self.target != player:
-                if not self.target in world.mobs:
-                    self.aggroed = False
-                    self.target = None
+            if world.current_biome != 3:
+                self.aggroed = False
+                self.target = None
 
             if self.target is not None:
                 # head movement
@@ -119,7 +118,7 @@ class Worm():
                     self.tail_rect.x += round(speed_x)
                     self.tail_rect.y += round(speed_y)
         else:
-            if abs(player.rect.x - self.head_rect.x) < 300:
+            if world.current_biome != 3 and abs(player.rect.x - self.head_rect.x) < 300:
                 self.target = player
                 self.aggroed = True
 

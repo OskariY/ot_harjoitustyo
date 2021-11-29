@@ -18,4 +18,5 @@
 | 12.12 | 2    | bugien korjausta ja dokumentointia |
 | 13.12 | 2    | pelin sisäisen konsolin luominen |
 | 14.12 | 3    | dokumentaation kirjoittamista ja bugien korjausta |
-| yht   | 59   | |
+| 18.12 | 3    | vuorokausisysteemi, zombiet ja uusi pelaajamodeli |
+| yht   | 62   | |

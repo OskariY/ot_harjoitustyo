@@ -28,6 +28,7 @@ class Console:
                 "give [item] [amount] - give an item",
                 "tp [x] [y] - teleport to coordinates",
                 "seed [seed] - set seed to [seed]",
+                "tod [tod] - set time of day",
                 ]
 
         self.cmdbuffer = ""
@@ -54,7 +55,7 @@ class Console:
             if len(args) == 2:
                 if not args[0].isnumeric():
                     self.log(f"Error: coordinate must be a number")
-                elif not args[1].isnumeric():
+                elif not args[1].strip("-").isdigit():
                     self.log(f"Error: coordinate must be a number")
                 else:
                     player.rect.x = int(args[0])
@@ -69,6 +70,15 @@ class Console:
                     world.seed = int(args[0])
             else:
                 self.log("Error: seed takes one argument")
+        elif cmd == "tod":
+            if len(args) == 1:
+                if not args[0].isnumeric():
+                    self.log(f"Error: tod must be a number")
+                else:
+                    world.tod = int(args[0])
+            else:
+                self.log("Error: tod takes one argument")
+                self.log("day: 0-40000, evening: 40000-50000, night: 50000-90000, morning: 90000-100000")
         else:
             self.log("Unknown command. Type 'help' to see all commands.")
 

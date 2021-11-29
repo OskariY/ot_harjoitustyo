@@ -27,7 +27,8 @@ pygame.display.set_caption("Northlands: unspaghettified")
 clock = pygame.time.Clock()
 
 # import functions, classes and resources (images, sound etc.) needed
-from resources import ITEMS, CRAFTING_REQUIREMENTS, jump_sound, break_sound, hurt_sound
+from resources import ITEMS, CRAFTING_REQUIREMENTS, jump_sound, break_sound, hurt_sound, songs, \
+                      evening, morning, night, darkness, glow
 from entities.player import Player
 from entities.particle import Particle
 from entities.fadingtext import FadingText
@@ -72,6 +73,7 @@ def main(world_name):
     world.scrollx = game_data["scrollx"]
     world.scrolly = game_data["scrolly"]
     world.seed = game_data["seed"]
+    world.tod = game_data["tod"]
     for x, y, mobtype in game_data["mob_coords"]:
         if mobtype == "bear":
             mob = WalkingMob(x, y)
@@ -91,6 +93,8 @@ def main(world_name):
     tile_hits_left = 10
 
     chunk_debug_enabled = False
+
+    song_playing = 0 # index of the current song
 
     # game loop
     while True:
@@ -113,6 +117,14 @@ def main(world_name):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+            if event.type == pygame.constants.USEREVENT:
+                song_playing += 1
+                if song_playing >= len(songs):
+                    song_playing = 0
+                pygame.mixer.music.load(songs[song_playing])
+                pygame.mixer.music.set_endevent(pygame.constants.USEREVENT)
+                pygame.mixer.music.play()
+
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_F1:
                     console.show = not console.show
@@ -169,6 +181,8 @@ def main(world_name):
                     if event.key == pygame.K_F9:
                         create_world("test")
                         main("test")
+                    if event.key == pygame.K_F5:
+                        player.chop()
                     if event.key == pygame.K_F3:
                         if chunk_debug_enabled:
                             chunk_debug_enabled = False
@@ -285,7 +299,7 @@ def main(world_name):
                                             tile_hits_left -= 2
                                     elif inventory.equipped == "axe" and breaking_tile[1] in ["plank", "plank wall", "slab"]:
                                         tile_hits_left -= 5
-                                    elif breaking_tile[1] in ["plant", "torch"]:
+                                    elif breaking_tile[1] in ["plant", "torch", "sapling"]:
                                         tile_hits_left = 0
                                     elif not breaking_tile[1] in ["stone", "coal block"]:
                                         tile_hits_left -= 1
@@ -304,7 +318,6 @@ def main(world_name):
 
                                     for i in range(10):
                                         world.particles.append(Particle(breaking_tile[0][0]*TILE_SIZE+8, breaking_tile[0][1]*TILE_SIZE+8, particle_color))
-                                    #player.chop(items[inventory.equipped]["image"])
 
                                     if tile_hits_left <= 0:
                                         selected_tile = None
@@ -316,6 +329,7 @@ def main(world_name):
                             # place tiles
                             if ITEMS[inventory.equipped]["build"] and inventory.in_inventory(inventory.equipped):
                                 if world.get_next_tiles(truemousepos) is True:
+                                    player.chop()
                                     world.place_tile(truemousepos,
                                                      inventory.equipped,
                                                      inventory,
@@ -352,7 +366,7 @@ def main(world_name):
             if event.type == pygame.MOUSEMOTION:
                 console.update()
         # drawing and updating game entities like the player
-        player.draw(display, world.scrollx, world.scrolly)
+        player.draw(display, world, inventory)
         player.update(inventory, world)
 
         for drop in world.drops:
@@ -379,6 +393,29 @@ def main(world_name):
         for worm in world.worms:
             worm.update(player, world)
             worm.draw(display, world.scrollx, world.scrolly)
+
+        # set time of day and draw appropriate lighting
+        # 0-40000 = day, 40000-50000 = evening, 50000-90000 = night, 90000-100000
+        world.tod += 10
+        if world.current_biome != 3:
+            if world.tod < 40000:
+                world.is_night = False
+            elif 40000 < world.tod < 50000:
+                display.blit(evening, (0, 0), special_flags=pygame.BLEND_RGBA_SUB)
+                world.is_night = False
+            elif 90000 < world.tod < 100000:
+                display.blit(morning, (0, 0), special_flags=pygame.BLEND_RGBA_SUB)
+                world.is_night = False
+            elif 50000 < world.tod < 90000:
+                display.blit(night, (0, 0), special_flags=pygame.BLEND_RGBA_SUB)
+                world.is_night = True
+        else:
+            display.blit(darkness, (0, 0), special_flags=pygame.BLEND_RGBA_SUB)
+        if world.tod >= 100000:
+            world.tod = 0
+        if world.tod > 40000:
+            for glowpos in world.glows:
+                display.blit(glow, glowpos, special_flags=pygame.BLEND_RGBA_ADD)
 
         # draw inventory
         inventory.draw(inv_open, display, mousepos)
@@ -407,6 +444,7 @@ def main(world_name):
             print_text(f"Current biome: {biomename}", 1, 10, display, 0, 10, fps_color)
             print_text(f"X: {player.rect.x} Y: {player.rect.y}", 1, 20, display, 0, 10, fps_color)
             print_text(f"Seed: {world.seed}", 1, 30, display, 0, 10, fps_color)
+            print_text(f"tod: {world.tod}", 1, 40, display, 0, 10, fps_color)
 
 
         # draw display surface onto screen, update it and clock the fps
@@ -416,8 +454,5 @@ def main(world_name):
         clock.tick(FPS)
 
 if __name__ == "__main__":
-    # if MUSIC setting is True, play music indefinately
-    if MUSIC:
-        pygame.mixer.music.play(-1)
     world_name = startmenu(display, screen, clock)
     main(world_name)

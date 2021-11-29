@@ -1,17 +1,18 @@
 import math
 import pygame
 from settings import TILE_SIZE
-from resources import player_images, ITEMS, hurt_sound, death_sound
+from resources import player_standing, player_walking, ITEMS, hurt_sound, death_sound, \
+                      player_hand, player_hand_straight
 from entities.fadingtext import FadingText
 from functions import move, draw_health_bar
 
 class Player():
     def __init__(self, x, y):
-        self.rect = pygame.Rect(x, y, TILE_SIZE, TILE_SIZE)
-        self.hitrect = pygame.Rect(x, y, TILE_SIZE, TILE_SIZE)
+        self.rect = pygame.Rect(x, y, TILE_SIZE, 2*TILE_SIZE)
+        self.hitrect = pygame.Rect(x, y, 2*TILE_SIZE, 2*TILE_SIZE)
 
-        self.original_image = player_images[0]
-        self.image = self.original_image
+        self.image = player_standing
+        self.hand_image = player_hand
         self.collisions = {
             "right": False,
             "left": False,
@@ -35,6 +36,11 @@ class Player():
         self.walkcount = 0
         self.i = 0
         self.sound_cooldown = 0
+        # hand rotation
+        self.hand1_angle = -90
+        self.hand2_angle = 0
+        self.hand1_pos = -6
+        self.hand2_pos = 0
 
         # chopping animation variables
         self.chopping_animation = 0
@@ -43,10 +49,9 @@ class Player():
 
         self.falling = False
 
-    def chop(self, image):
+    def chop(self):
         self.chopping_animation = 10
         self.chopping_rotation = 10
-        self.chopping_image = image
 
     def hit(self, weapon, world, mousex, mousey):
         """
@@ -54,7 +59,7 @@ class Player():
         by placing an invisible rectangle towards the mouse and checking for collisions
         with mobs
         """
-        self.chop(ITEMS[weapon]["image"])
+        self.chop()
         if abs(self.rect.centerx - mousex - world.scrollx) < 40 \
                 and abs(self.rect.centery - mousey - world.scrolly) < 40:
             self.hitrect.centerx = mousex+world.scrollx
@@ -143,15 +148,6 @@ class Player():
             elif self.dx < -self.speed:
                 self.dx += 1
 
-        if self.dx != 0:
-            self.walkcount += 1
-            if self.walkcount >= 10:
-                self.walkcount = 0
-                self.i += 1
-                if self.i > 1:
-                    self.i = 0
-                self.image = player_images[self.i]
-
         # death
         if self.health <= 0:
             death_sound.play()
@@ -181,29 +177,98 @@ class Player():
         else:
             move(self, world, True)
 
+        self.animation()
 
-    def draw(self, display, scrollx, scrolly): # pragma: no cover
+    def animation(self): # pragma: no cover
+        """
+        changes the player images to create the appearence of a running animation
+        """
+        if self.dx != 0:
+            self.walkcount += 1
+            if self.walkcount >= 10:
+                self.walkcount = 0
+                self.i += 1
+                if self.i > 2:
+                    self.i = 0
+                self.image = player_walking[self.i]
+                self.hand_image = player_hand
+                if self.i == 0:
+                    self.hand1_angle = 0
+                    self.hand2_angle = -90
+                    if self.invert:
+                        self.hand1_pos = -6
+                        self.hand2_pos = 0
+                    else:
+                        self.hand1_pos = 0
+                        self.hand2_pos = -6
+                elif self.i == 1:
+                    self.hand1_angle = -45
+                    self.hand2_angle = -45
+                    self.hand1_pos = -5
+                    self.hand2_pos = -5
+                elif self.i == 2:
+                    self.hand1_angle = -90
+                    self.hand2_angle = 0
+                    if self.invert:
+                        self.hand1_pos = 0
+                        self.hand2_pos = -6
+                    else:
+                        self.hand1_pos = -6
+                        self.hand2_pos = 0
+                if self.invert:
+                    self.hand1_angle = -self.hand1_angle
+                    self.hand2_angle = -self.hand2_angle
+        else:
+            self.image = player_standing
+            self.hand_image = player_hand_straight
+            self.hand1_angle = 0
+            self.hand2_angle = 0
+            self.hand1_pos = -5
+            self.hand2_pos = -5
+            if self.invert:
+                self.hand2_pos += 1
+
+    def draw(self, display, world, inventory): # pragma: no cover
         """
         draws the player character, health and chopping animation
-        Args:
-            display, scrollx, scrolly
         """
-        # draw player to the screen
-        display.blit(pygame.transform.flip(self.image, self.invert, 0), (self.rect.x-scrollx, self.rect.y-scrolly))
+
         # draw the health bar if health is below maximum
-        draw_health_bar(self.rect.centerx-scrollx, self.rect.y-TILE_SIZE-scrolly,
+        draw_health_bar(self.rect.centerx-world.scrollx, self.rect.y-TILE_SIZE-world.scrolly,
                         display, self.health, self.max_health)
+
+        hand_x, hand_y = self.rect.x-world.scrollx+7, self.rect.y-world.scrolly+10
+        hand1 = pygame.transform.flip(self.hand_image, self.invert, 0)
+        hand1 = pygame.transform.rotate(hand1, self.hand1_angle)
+        display.blit(hand1, (hand_x+self.hand1_pos, hand_y))
+
+        # draw player to the screen
+        display.blit(pygame.transform.flip(self.image, self.invert, 0), (self.rect.x-world.scrollx, self.rect.y-world.scrolly))
+
 
         # chopping animation
         if self.chopping_animation > 0:
             self.chopping_animation -= 1
-            if self.chopping_animation in [7, 4]:
-                self.chopping_rotation += 20
+            self.chopping_rotation += 2
+            self.hand_image = player_hand
+            hand2 = pygame.transform.flip(self.hand_image, self.invert, 0)
             if self.invert:
                 rot = self.chopping_rotation
-                chopx = self.rect.x-scrollx - 4
+                hand2 = pygame.transform.rotate(hand2, 45+self.chopping_rotation)
+                self.hand2_pos = -4
+                chopx = self.rect.x - world.scrollx - 9 + self.chopping_animation // 3
             else:
                 rot = -self.chopping_rotation
-                chopx = self.rect.x-scrollx + 2
-            chopy = self.rect.y-scrolly
-            display.blit(pygame.transform.rotate(pygame.transform.flip(self.chopping_image, self.invert, 0), rot), (chopx, chopy))
+                hand2 = pygame.transform.rotate(hand2, -45-self.chopping_rotation)
+                self.hand2_pos = -4
+                chopx = self.rect.x - world.scrollx + 5 - self.chopping_animation // 3
+            chopy = self.rect.y-world.scrolly+2
+            if inventory.equipped != "":
+                item = pygame.transform.flip(ITEMS[inventory.equipped]["image"], self.invert, 0)
+                if ITEMS[inventory.equipped]["tool"]:
+                    display.blit(pygame.transform.rotate(item, rot), (chopx, chopy))
+            display.blit(hand2, (hand_x+self.hand2_pos, hand_y))
+        else:
+            hand2 = pygame.transform.flip(self.hand_image, self.invert, 0)
+            hand2 = pygame.transform.rotate(hand2, self.hand2_angle)
+            display.blit(hand2, (hand_x+self.hand2_pos, hand_y))

@@ -1,5 +1,7 @@
+import random
+import os
 import pygame
-from settings import GREEN, WHITE, DISPLAY_WIDTH, DISPLAY_HEIGHT
+from settings import GREEN, WHITE, DISPLAY_WIDTH, DISPLAY_HEIGHT, TILE_SIZE, MUSIC
 
 # directories
 MUSIC_DIR = "resources/music/"
@@ -7,10 +9,21 @@ IMAGES_DIR = "resources/images/"
 
 # music and sounds
 pygame.mixer.init()
-pygame.mixer.music.set_volume(1.0)
 
+# songs
+if MUSIC:
+    sound_names = os.listdir(f"{MUSIC_DIR}")
+    songs = []
+    random.shuffle(sound_names)
+    for song in sound_names:
+        if song.endswith(".mp3"):
+            if songs == []:
+                pygame.mixer.music.load(f"{MUSIC_DIR}{song}")
+                pygame.mixer.music.set_endevent(pygame.constants.USEREVENT)
+                pygame.mixer.music.play()
+            songs.append(f"{MUSIC_DIR}{song}")
 
-pygame.mixer.music.load(f"{MUSIC_DIR}oyho.ogg")
+# sound effects
 jump_sound = pygame.mixer.Sound(f"{MUSIC_DIR}jump.wav")
 throw_sound = pygame.mixer.Sound(f"{MUSIC_DIR}throw.wav")
 hurt_sound = pygame.mixer.Sound(f"{MUSIC_DIR}hurt.wav")
@@ -18,12 +31,38 @@ break_sound = pygame.mixer.Sound(f"{MUSIC_DIR}break.wav")
 death_sound = pygame.mixer.Sound(f"{MUSIC_DIR}death.wav")
 build_sound = pygame.mixer.Sound(f"{MUSIC_DIR}build.wav")
 
+# lighting
+evening = pygame.Surface((DISPLAY_WIDTH, DISPLAY_HEIGHT), flags=pygame.SRCALPHA)
+evening.fill((50, 50, 10))
+morning = pygame.Surface((DISPLAY_WIDTH, DISPLAY_HEIGHT), flags=pygame.SRCALPHA)
+morning.fill((5, 30, 30))
+night = pygame.Surface((DISPLAY_WIDTH, DISPLAY_HEIGHT), flags=pygame.SRCALPHA)
+night.fill((60, 60, 20))
+darkness = pygame.Surface((DISPLAY_WIDTH, DISPLAY_HEIGHT), flags=pygame.SRCALPHA)
+darkness.fill((50, 50, 50))
+dark = False
+glowradius = 128
+glow = pygame.Surface((glowradius*2, glowradius*2), flags=pygame.SRCALPHA)
+glowcolor = pygame.Surface((glowradius*2, glowradius*2), flags=pygame.SRCALPHA)
+glowcolor.set_colorkey((0, 0, 0))
+for i in range(glowradius // 8):
+    pygame.draw.circle(glowcolor, ((2+i)*4, (2+i)*4, (1+i)*4), (glowradius, glowradius), glowradius-i*8)
+glow.blit(glowcolor, (0, 0), special_flags=pygame.BLEND_RGB_ADD)
+
+
 # player images
-player_image1 = pygame.image.load(f"{IMAGES_DIR}player1.png").convert()
-player_image2 = pygame.image.load(f"{IMAGES_DIR}player2.png").convert()
-player_image1.set_colorkey(GREEN)
-player_image2.set_colorkey(GREEN)
-player_images = [player_image1, player_image2]
+player_standing = pygame.image.load(f"{IMAGES_DIR}/player/standing.png").convert()
+player_standing.set_colorkey(GREEN)
+player_hand_straight = pygame.image.load(f"{IMAGES_DIR}/player/straight_hand.png").convert()
+player_hand_straight.set_colorkey(GREEN)
+player_hand = pygame.image.load(f"{IMAGES_DIR}/player/hand.png").convert()
+player_hand.set_colorkey(GREEN)
+player_walking = []
+for image_name in os.listdir(f"{IMAGES_DIR}/player/"):
+    if image_name.startswith("walking"):
+        img = pygame.image.load(f"{IMAGES_DIR}/player/{image_name}").convert()
+        img.set_colorkey(GREEN)
+        player_walking.append(img)
 
 # tile images
 grasstile = pygame.image.load(f"{IMAGES_DIR}tiles/grass.png").convert()
@@ -76,8 +115,16 @@ night_background_image = pygame.transform.scale(pygame.image.load(f"{IMAGES_DIR}
 
 polarbear_images = []
 for i in range(0, 12):
-    polarbear_image = pygame.transform.scale(pygame.image.load("{}polarbear/{}.png".format(IMAGES_DIR, i)), (32, 32))
+    polarbear_image = pygame.transform.scale(
+            pygame.image.load("{}polarbear/{}.png".format(IMAGES_DIR, i)), (2*TILE_SIZE, 2*TILE_SIZE)
+            )
     polarbear_images.append(polarbear_image)
+
+zombie_walking = []
+for i in range(1, 4):
+    image = pygame.image.load("{}zombie/zombie_walking{}.png".format(IMAGES_DIR, str(i)))
+    image.set_colorkey(GREEN)
+    zombie_walking.append(image)
 
 skeleton_images = []
 for i in range(1, 3):
