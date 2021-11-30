@@ -1,14 +1,16 @@
-from resources import *
-from settings import *
-from functions import *
+import pygame
+import random
+from resources import ITEMS, player_images, death_sound
+from settings import TILE_SIZE, BLACK, RED, GREEN, DISPLAY_WIDTH, DISPLAY_HEIGHT
+from functions import move, print_text, add_to_inventory
 
 class Player():
     def __init__(self, x, y):
         self.rect = pygame.Rect(x, y, TILE_SIZE, TILE_SIZE)
         self.hitrect = pygame.Rect(x, y, TILE_SIZE, TILE_SIZE)
 
-        self.original_image = player_image1
-        self.image = player_image1
+        self.original_image = player_images[0] 
+        self.image = self.original_image
         self.collisions = {
             "right": False,
             "left": False,
@@ -40,12 +42,12 @@ class Player():
 
         self.falling = False
 
-    def update(self, scrollx, scrolly, inventory, tiles, mobs, drops, popups, slabs):
+    def update(self, inventory, tiles, mobs, drops, popups, slabs):
         """
         updates the player object
 
         Args:
-            scrollx, scrolly, inventory, tiles, mobs, drops, popups, slabs
+            inventory, tiles, mobs, drops, popups, slabs
         """
         
         # drop collisions
@@ -100,8 +102,8 @@ class Player():
         # death
         if self.health <= 0:
             death_sound.play()
-            self.rect.x = spawn_x
-            self.rect.y = spawn_y
+            self.rect.x = 0
+            self.rect.y = -100
             self.health = self.max_health
 
         # gravity and falling

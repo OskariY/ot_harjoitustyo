@@ -1,105 +1,105 @@
 import pygame
-from settings import *
+from settings import GREEN, WHITE, DISPLAY_WIDTH, DISPLAY_HEIGHT
 
 # directories
-music_dir = "src/music/"
-images_dir = "src/images/"
+MUSIC_DIR = "src/music/"
+IMAGES_DIR = "src/images/"
 
 # music and sounds
 pygame.mixer.init()
 pygame.mixer.music.set_volume(0.5)
 
 
-pygame.mixer.music.load(f"{music_dir}oyho.ogg")
-jump_sound = pygame.mixer.Sound(f"{music_dir}jump.wav")
-throw_sound = pygame.mixer.Sound(f"{music_dir}throw.wav")
-hurt_sound = pygame.mixer.Sound(f"{music_dir}hurt.wav")
-break_sound = pygame.mixer.Sound(f"{music_dir}break.wav")
-death_sound = pygame.mixer.Sound(f"{music_dir}death.wav")
-build_sound = pygame.mixer.Sound(f"{music_dir}build.wav")
+pygame.mixer.music.load(f"{MUSIC_DIR}oyho.ogg")
+jump_sound = pygame.mixer.Sound(f"{MUSIC_DIR}jump.wav")
+throw_sound = pygame.mixer.Sound(f"{MUSIC_DIR}throw.wav")
+hurt_sound = pygame.mixer.Sound(f"{MUSIC_DIR}hurt.wav")
+break_sound = pygame.mixer.Sound(f"{MUSIC_DIR}break.wav")
+death_sound = pygame.mixer.Sound(f"{MUSIC_DIR}death.wav")
+build_sound = pygame.mixer.Sound(f"{MUSIC_DIR}build.wav")
 
 # player images
-player_image1 = pygame.image.load(f"{images_dir}player1.png").convert()
-player_image2 = pygame.image.load(f"{images_dir}player2.png").convert()
+player_image1 = pygame.image.load(f"{IMAGES_DIR}player1.png").convert()
+player_image2 = pygame.image.load(f"{IMAGES_DIR}player2.png").convert()
 player_image1.set_colorkey(GREEN)
 player_image2.set_colorkey(GREEN)
 player_images = [player_image1, player_image2]
 
 # tile images
-grasstile = pygame.image.load(f"{images_dir}tiles/grass.png").convert()
-snowy_grass = pygame.image.load(f"{images_dir}tiles/snowy_grass.png").convert()
-rocktile = pygame.image.load(f"{images_dir}tiles/rock.png").convert()
-stonetile = pygame.image.load(f"{images_dir}tiles/stone.png").convert()
-dirttile = pygame.image.load(f"{images_dir}tiles/dirt.png").convert()
-planktile = pygame.image.load(f"{images_dir}tiles/plank.png").convert()
-coaltile = pygame.image.load(f"{images_dir}tiles/coaltile.png").convert()
-plank_wall = pygame.image.load(f"{images_dir}tiles/plank_wall.png").convert()
-plant_image = pygame.image.load(f"{images_dir}tiles/plant.png").convert()
+grasstile = pygame.image.load(f"{IMAGES_DIR}tiles/grass.png").convert()
+snowy_grass = pygame.image.load(f"{IMAGES_DIR}tiles/snowy_grass.png").convert()
+rocktile = pygame.image.load(f"{IMAGES_DIR}tiles/rock.png").convert()
+stonetile = pygame.image.load(f"{IMAGES_DIR}tiles/stone.png").convert()
+dirttile = pygame.image.load(f"{IMAGES_DIR}tiles/dirt.png").convert()
+planktile = pygame.image.load(f"{IMAGES_DIR}tiles/plank.png").convert()
+coaltile = pygame.image.load(f"{IMAGES_DIR}tiles/coaltile.png").convert()
+plank_wall = pygame.image.load(f"{IMAGES_DIR}tiles/plank_wall.png").convert()
+plant_image = pygame.image.load(f"{IMAGES_DIR}tiles/plant.png").convert()
 plant_image.set_colorkey((255, 255, 255))
 
 # tools
-hammer_image = pygame.image.load(f"{images_dir}hammer.png").convert()
+hammer_image = pygame.image.load(f"{IMAGES_DIR}hammer.png").convert()
 hammer_image.set_colorkey(WHITE)
-pick_image = pygame.image.load(f"{images_dir}pickaxe.png").convert()
+pick_image = pygame.image.load(f"{IMAGES_DIR}pickaxe.png").convert()
 pick_image.set_colorkey(WHITE)
-shovel_image = pygame.image.load(f"{images_dir}spade.png").convert()
+shovel_image = pygame.image.load(f"{IMAGES_DIR}spade.png").convert()
 shovel_image.set_colorkey(WHITE)
-axe_image = pygame.image.load(f"{images_dir}axe.png").convert()
+axe_image = pygame.image.load(f"{IMAGES_DIR}axe.png").convert()
 axe_image.set_colorkey(WHITE)
-hoe_image = pygame.image.load(f"{images_dir}hoe.png").convert()
+hoe_image = pygame.image.load(f"{IMAGES_DIR}hoe.png").convert()
 hoe_image.set_colorkey(WHITE)
 
 
 # others
-select_arrow = pygame.image.load(f"{images_dir}select_arrow.png")
+select_arrow = pygame.image.load(f"{IMAGES_DIR}select_arrow.png")
 select_arrow.set_colorkey(WHITE)
-sapling_image = pygame.image.load(f"{images_dir}sapling.png").convert()
+sapling_image = pygame.image.load(f"{IMAGES_DIR}sapling.png").convert()
 sapling_image.set_colorkey(WHITE)
-slab_image = pygame.image.load(f"{images_dir}slab.png").convert()
+slab_image = pygame.image.load(f"{IMAGES_DIR}slab.png").convert()
 slab_image.set_colorkey(WHITE)
-coal_item = pygame.image.load(f"{images_dir}coal.png").convert()
+coal_item = pygame.image.load(f"{IMAGES_DIR}coal.png").convert()
 coal_item.set_colorkey(WHITE)
-arrow_image = pygame.image.load(f"{images_dir}arrow.png").convert()
+arrow_image = pygame.image.load(f"{IMAGES_DIR}arrow.png").convert()
 arrow_image.set_colorkey(WHITE)
-torch_image = pygame.image.load(f"{images_dir}torch.png").convert()
+torch_image = pygame.image.load(f"{IMAGES_DIR}torch.png").convert()
 torch_image.set_colorkey(WHITE)
-meat_image = pygame.image.load(f"{images_dir}meat.png").convert()
+meat_image = pygame.image.load(f"{IMAGES_DIR}meat.png").convert()
 meat_image.set_colorkey(GREEN)
-worm_head = pygame.image.load(f"{images_dir}worm/head.png").convert()
+worm_head = pygame.image.load(f"{IMAGES_DIR}worm/head.png").convert()
 worm_head.set_colorkey(WHITE)
-worm_body = pygame.image.load(f"{images_dir}worm/body.png").convert()
+worm_body = pygame.image.load(f"{IMAGES_DIR}worm/body.png").convert()
 worm_body.set_colorkey(WHITE)
-worm_tail = pygame.image.load(f"{images_dir}worm/tail.png").convert()
+worm_tail = pygame.image.load(f"{IMAGES_DIR}worm/tail.png").convert()
 worm_tail.set_colorkey(WHITE)
-background_image = pygame.transform.scale(pygame.image.load(f"{images_dir}background.png").convert(), (DISPLAY_WIDTH, DISPLAY_HEIGHT))
-night_background_image = pygame.transform.scale(pygame.image.load(f"{images_dir}background_night.png").convert(), (DISPLAY_WIDTH, DISPLAY_HEIGHT))
+background_image = pygame.transform.scale(pygame.image.load(f"{IMAGES_DIR}background.png").convert(), (DISPLAY_WIDTH, DISPLAY_HEIGHT))
+night_background_image = pygame.transform.scale(pygame.image.load(f"{IMAGES_DIR}background_night.png").convert(), (DISPLAY_WIDTH, DISPLAY_HEIGHT))
 
 polarbear_images = []
 for i in range(0, 12):
-    polarbear_image = pygame.transform.scale(pygame.image.load("{}polarbear/{}.png".format(images_dir, i)), (32, 32))
+    polarbear_image = pygame.transform.scale(pygame.image.load("{}polarbear/{}.png".format(IMAGES_DIR, i)), (32, 32))
     polarbear_images.append(polarbear_image)
 
 skeleton_images = []
 for i in range(1, 3):
-    image = pygame.image.load("{}skeleton/skeleton{}.png".format(images_dir, str(i)))
+    image = pygame.image.load("{}skeleton/skeleton{}.png".format(IMAGES_DIR, str(i)))
     image.set_colorkey(GREEN)
     skeleton_images.append(image)
 
 crow_images = []
 for i in range(1, 4):
-    crow = pygame.transform.scale(pygame.image.load("{}crow/{}.png".format(images_dir, i)), (16, 16))
+    crow = pygame.transform.scale(pygame.image.load("{}crow/{}.png".format(IMAGES_DIR, i)), (16, 16))
     crow_images.append(crow)
 
 tree_images = []
 for i in range(1,5):
-    tree_image = pygame.image.load("{}trees/tree{}.png".format(images_dir, i)).convert()
+    tree_image = pygame.image.load("{}trees/tree{}.png".format(IMAGES_DIR, i)).convert()
     tree_image.set_colorkey((255, 255, 255))
     tree_images.append(tree_image)
 
 explosion_images = []
 for i in range(0, 9):
 
-    explosion_image = pygame.image.load("{}explosion/{}.png".format(images_dir, i)).convert()
+    explosion_image = pygame.image.load("{}explosion/{}.png".format(IMAGES_DIR, i)).convert()
     explosion_image.set_colorkey((229, 229, 229))
     explosion_images.append(explosion_image)
 

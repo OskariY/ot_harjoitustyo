@@ -1,8 +1,8 @@
 import noise
 import random
 import pygame
-from settings import *
-from resources import *
+from settings import BLACK, BLUE, BROWN, GRAY, BROWN, GRASSGREEN, FONT, TILE_SIZE, CHUNK_SIZE
+from resources import ITEMS, break_sound, build_sound
 
 # modifiers for how fast the algorythm goes through the noise pattern
 noise_speed = 0.05

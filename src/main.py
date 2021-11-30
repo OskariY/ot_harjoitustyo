@@ -8,18 +8,19 @@ spaghetti code.
 
 import pygame
 import sys
+import random
 
 # import constants/settings
-from settings import *
+from settings import WINDOW_WIDTH, WINDOW_HEIGHT, DISPLAY_WIDTH, DISPLAY_HEIGHT, CENTER, WHITE, FPS, CHUNK_SIZE, TILE_SIZE, GRAY, BLACK, BROWN, GRASSGREEN
 # intialize pygame and set up display
 pygame.init()
 screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 display = pygame.Surface((DISPLAY_WIDTH, DISPLAY_HEIGHT))
 pygame.display.set_caption("Northlands: unspaghettified")
 # import functions, classes and resources (images, sound etc.) needed
-from resources import *
-from functions import *
-from entities import *
+from resources import ITEMS, background_image, tree_image, jump_sound, break_sound
+from functions import print_text, add_to_inventory, generate_chunk, in_inventory, remove_tile, equip_item, remove_inventory_item, get_tile, place_tile, inventory_drag, get_next_tiles, draw_tile_outline
+from entities import Player, Particle, FadingText
 
 
 def main():
@@ -114,8 +115,8 @@ def main():
                     game_map[target_chunk] = generate_chunk(target_x, target_y, seed)
                 # go through all tiles in the target chunk
                 for tile in game_map[target_chunk][0]:
-                    if tile[1] == "torch":
-                        glows.append((tile[0][0]*TILE_SIZE-scrollx-glowradius+TILE_SIZE//2,tile[0][1]*TILE_SIZE-scrolly-glowradius+TILE_SIZE//2))
+#                    if tile[1] == "torch":
+#                        glows.append((tile[0][0]*TILE_SIZE-scrollx-glowradius+TILE_SIZE//2,tile[0][1]*TILE_SIZE-scrolly-glowradius+TILE_SIZE//2))
 
                     if tile[1] == "slab":
                         slabs.append(pygame.Rect(tile[0][0]*TILE_SIZE,tile[0][1]*TILE_SIZE,TILE_SIZE,TILE_SIZE))
@@ -129,19 +130,19 @@ def main():
 
                     # mob spawns, when I get around to adding the mob classes
                     # BROKEN CODE, FIX!!
-                    if MOB_SPAWNS:
-                        if tile[1] == "snowy grass":
-                            if random.randint(1, 30000) == 1:
-                                if tile[0][0]*TILE_SIZE < player.rect.x - 100 or tile[0][0]*TILE_SIZE > player.rect.x + 100:
-                                    print("bear spawned, mobs: {}".format(len(mobs)))
-                                    mobs.append(WalkingMob(tile[0][0]*TILE_SIZE, tile[0][1]*TILE_SIZE-48, 1))
-                        if is_night == True:
-                            if tile[1] in ["snowy grass", "grass"]:
-                                if random.randint(1, 10000) == 1:
-                                    if tile[0][0]*TILE_SIZE < player.rect.x - 100 or tile[0][0]*TILE_SIZE > player.rect.x + 100:
-                                        print("skeleton spawned, mobs: {}".format(len(mobs)))
-                                        mobs.append(WalkingMob(tile[0][0]*TILE_SIZE, tile[0][1]*TILE_SIZE-48, 2))
-
+#                    if MOB_SPAWNS:
+#                        if tile[1] == "snowy grass":
+#                            if random.randint(1, 30000) == 1:
+#                                if tile[0][0]*TILE_SIZE < player.rect.x - 100 or tile[0][0]*TILE_SIZE > player.rect.x + 100:
+#                                    print("bear spawned, mobs: {}".format(len(mobs)))
+#                                    mobs.append(WalkingMob(tile[0][0]*TILE_SIZE, tile[0][1]*TILE_SIZE-48, 1))
+#                        if is_night == True:
+#                            if tile[1] in ["snowy grass", "grass"]:
+#                                if random.randint(1, 10000) == 1:
+#                                    if tile[0][0]*TILE_SIZE < player.rect.x - 100 or tile[0][0]*TILE_SIZE > player.rect.x + 100:
+#                                        print("skeleton spawned, mobs: {}".format(len(mobs)))
+#                                        mobs.append(WalkingMob(tile[0][0]*TILE_SIZE, tile[0][1]*TILE_SIZE-48, 2))
+#
                     # physics
                     if tile[1] in ["stone","dirt","grass","snowy grass","plank","rock","coal block","slab"]:
                         tiles.append(pygame.Rect(tile[0][0]*TILE_SIZE,tile[0][1]*TILE_SIZE,TILE_SIZE,TILE_SIZE))
@@ -220,7 +221,7 @@ def main():
                                 else:
                                     player.health += ITEMS[equipped]["heal"]
                                 inventory, equipped = remove_inventory_item(equipped, 1)
-                                popups.append(FadingText(player.rect.centerx, player.rect.top, "+{} HP".format(str(items[equipped]["heal"])), GRASSGREEN))
+                                popups.append(FadingText(player.rect.centerx, player.rect.top, "+{} HP".format(str(ITEMS[equipped]["heal"])), GRASSGREEN))
                             # tool logic
                             if ITEMS[equipped]["tool"] and in_inventory(inventory, equipped):
                                 #player.hit(equipped, mobs, worms, mousex, mousey)
@@ -296,7 +297,7 @@ def main():
 
         # drawing and updating game entities like the player
         player.draw(display, scrollx, scrolly)
-        player.update(scrollx, scrolly, inventory, tiles, mobs, drops, popups, slabs)
+        player.update(inventory, tiles, mobs, drops, popups, slabs)
 
         for drop in drops:
             drop.update(tiles, scrollx, scrolly)
