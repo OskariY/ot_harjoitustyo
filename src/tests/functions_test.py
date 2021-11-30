@@ -94,6 +94,4 @@ class TestInventory(unittest.TestCase):
         # remove axe
         self.inventory, equipped = remove_inventory_item(self.inventory, equipped, equipped, 1)
 
-        # inventory and equipped should be empty
         self.assertEqual(self.inventory[0][1], "")
-        self.assertEqual(equipped, "")
