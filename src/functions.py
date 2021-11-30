@@ -2,6 +2,7 @@ import noise
 import random
 import pygame
 from settings import *
+from resources import *
 
 # modifiers for how fast the algorythm goes through the noise pattern
 noise_speed = 0.05
@@ -10,21 +11,21 @@ cave_noise_multiplier = 30
 
 def generate_chunk(x,y,seed):
     """
-    generate_chunk generates a list of tiles with their coordinates and types
+    Generates a list of tiles with their coordinates and types using
+    the perlin noise algorythm.
 
     Args:
         x: x chunk coord
         y: y chunk coord
         seed: offset to the noise x coord
-
     Returns:
         [[[tilex, tiley], tiletype], [[tilex, tiley], tiletype]]
 
     """
 
-    # variation in noise multiplayer to create variating
-    # height differences in the game world
+    # variation in the height differences through an other noise map
     noise_multiplier = (noise.pnoise1((x + seed) * 0.01, repeat=99999999) + 1) * 20
+    # heat map for biome generation
     heat_map = int(round(noise.pnoise1((x + seed) * 0.01, repeat=99999999) * noise_multiplier))
     # setting biome based on heat map
     # 1: Forest, 2: Tundra, 3: Underground
@@ -40,9 +41,14 @@ def generate_chunk(x,y,seed):
             target_y = y * CHUNK_SIZE + y_pos
             tile_type = 0
 
-            plant_map = noise.pnoise1((target_x + seed) * 0.4, repeat=99999999, persistence=2) * noise_multiplier
-            caveheight = int(round(noise.pnoise2((target_x + seed) * cave_noise_speed, (target_y) * cave_noise_speed, repeatx=99999999, repeaty=99999999) * cave_noise_multiplier))
-            height = int(round(noise.pnoise1((target_x + seed) * noise_speed, repeat=99999999) * noise_multiplier))
+            plant_map = noise.pnoise1((target_x + seed) * 0.4, 
+                                       repeat=99999999, persistence=2) * noise_multiplier
+            caveheight = int(round(noise.pnoise2((target_x + seed) * cave_noise_speed, 
+                                                 (target_y) * cave_noise_speed, 
+                                                 repeatx=99999999, repeaty=99999999
+                                                 ) * cave_noise_multiplier))
+            height = int(round(noise.pnoise1((target_x + seed) * noise_speed, repeat=99999999
+                                             ) * noise_multiplier))
 
             # cave generation
             if target_y > 29 - height:
@@ -64,7 +70,6 @@ def generate_chunk(x,y,seed):
 
             elif target_y == 7 - height:
                 # plants
-
                     if plant_map < 0:
                         if biome == 1:
                             tile_type = "plant"
@@ -80,13 +85,24 @@ def generate_chunk(x,y,seed):
                         elif biome == 2:
                             if 5 < plant_map < 10:
                                 tile_type = "tree4"
-                    # flags
-                    if plant_map == 10:
-                        tile_type = "flag"
             if tile_type != 0:
                 chunk_data[0].append([[target_x,target_y],tile_type])
     return chunk_data
 
+def print_text(text, x, y, display, allignment=0, size=32, color=BLACK):
+    """
+    Prints text onto the screen
+    allignments: 0=left, 1=center, 2=right
+    Args:
+        text, x, y, display, allignment=0, size=32, color=BLACK
+    """
+    font = pygame.font.SysFont(FONT, size)
+    surf = font.render(text, False, color)
+    if allignment == 1:
+        x = x - surf.get_width() / 2
+    elif allignment == 2:
+        x = x - surf.get_width()
+    display.blit(surf, (x, y))
 
 def move(rect, dx, dy, tiles, slabs=[], entities=[]):
     """Moves a pygame rectangle
@@ -133,3 +149,364 @@ def move(rect, dx, dy, tiles, slabs=[], entities=[]):
                     collisions["up"] = True
 
     return rect, collisions
+
+def add_to_inventory(inventory, item, amount):
+    """
+    Adds item to inventory
+    Args:
+        inventory, item, amount
+    Returns:
+        inventory
+    """
+    item_in_inventory = False
+    # see if item is in inventory
+    for squere in inventory:
+        # if the slot contains item and has less items than the max stack
+        if squere[1] == item and squere[2] < ITEMS[item]["stack"]:
+
+            if squere[2] + amount > ITEMS[item]["stack"]:
+                minus = ITEMS[item]["stack"] - squere[2]
+                squere[2] = ITEMS[item]["stack"]
+                inventory = add_to_inventory(item, amount - minus)
+            else:
+                squere[2] += amount
+
+            item_in_inventory = True
+            break
+    if not item_in_inventory:
+
+        for squere in inventory:
+            if squere[1] == "" or squere[1] == None:
+                squere[1] = item
+                if amount > ITEMS[item]["stack"]:
+                    squere[2] = ITEMS[item]["stack"]
+                    inventory = add_to_inventory(inventory, item, amount - ITEMS[item]["stack"])
+                else:
+                    squere[2] = amount
+                break
+
+    return inventory
+    
+
+def remove_inventory_item(inventory, equipped, item, amount):
+    """
+    Removes item from inventory
+    Args:
+        inventory, equipped, item, amount
+    Returns:
+        inventory, equipped
+
+    """
+    for squere in inventory:
+        if squere[1] == item:
+            if squere[2] < amount:
+                squere[1] = ""
+                squere[2] = 0
+                squere[3] = False
+                inventory, equipped = remove_inventory_item(inventory, equipped, item, amount - squere[2])
+            else:
+                squere[2] -= amount
+                if squere[2] <= 0:
+                    squere[1] = ""
+                    squere[2] = 0
+                    squere[3] = False
+                    if equipped == squere[1]:
+                        equipped = ""
+
+            break
+    return inventory, equipped
+
+def inventory_drag(inv_select1, inv_select2, inventory):
+    """
+    Drags items around the inventory
+    Args:
+        inv_select1, inv_select2, inventory
+    Returns:
+        inventory
+    """
+    if inv_select1 != None and inv_select2 != None and inv_select1 != inv_select2:
+        # if destination is empty, move item
+        if inventory[inv_select2][1] == None:
+            inventory[inv_select2][1] = inventory[inv_select1][1]
+            inventory[inv_select2][2] = inventory[inv_select1][2]
+            inventory[inv_select1][1] = None
+            inventory[inv_select1][2] = 0
+        else:
+            # if destination item is same as beginning item
+            if inventory[inv_select1][1] == inventory[inv_select2][1]:
+                # if destination + beginning is more than the stack limit
+                if inventory[inv_select2][2] + inventory[inv_select1][2] > ITEMS[inventory[inv_select2][1]]["stack"]:
+                    minus = ITEMS[inventory[inv_select2][1]]["stack"] - inventory[inv_select2][2]
+                    inventory[inv_select2][2] = ITEMS[inventory[inv_select2][1]]["stack"]
+                    inventory[inv_select1][2] -= minus
+
+                # stack
+                else:
+                    inventory[inv_select2][2] += inventory[inv_select1][2]
+                    inventory[inv_select1][1] = None
+                    inventory[inv_select1][2] = 0
+            else:
+                temp1 = inventory[inv_select2][1]
+                temp2 = inventory[inv_select2][2]
+                inventory[inv_select2][1] = inventory[inv_select1][1]
+                inventory[inv_select2][2] = inventory[inv_select1][2]
+                inventory[inv_select1][1] = temp1
+                inventory[inv_select1][2] = temp2
+    return inventory
+
+def in_inventory(inventory, item, amount=1):
+    """
+    Checks if an item is in the inventory
+    Args:
+        inventory, item, amount
+    Returns:
+        boolean
+    """
+    for squere in inventory:
+        if squere[1] == item and squere[2] >= amount:
+            return True
+    return False
+
+def equip_item(inventory, equipped, index):
+    """
+    Takes inventory index (0-29) as argument and equips it and unequips all other ITEMS
+    Args:
+        inventory, equipped, index
+    Returns:
+        inventory, equipped
+    """
+    for i, item in enumerate(inventory):
+        if i == index:
+            item[3] = True
+            equipped = inventory[index][1]
+        else:
+            item[3] = False
+    return inventory, equipped
+
+def get_next_tiles(pos, buildables, scrollx, scrolly):
+    """
+    Detects if buildable tiles are adjacent to the mouse
+
+    Args:
+        pos: (x,y), buidables: (list), scrollx, scrolly
+    Returns:
+        boolean
+    """
+    trueposx = pos[0] + scrollx
+    trueposy = pos[1] + scrolly
+
+    testrect = pygame.Rect(0, 0, TILE_SIZE*2, TILE_SIZE*2)
+    testrect.centerx = trueposx
+    testrect.centery = trueposy
+    color = BLUE
+    for tile in buildables:
+        if tile.colliderect(testrect):
+            return True
+    return False
+
+def remove_tile(pos, game_map, particles, drops, tiles, scrollx, scrolly, player, nodrops=False, nodistance=False):
+    """
+    Removes a tile and by default spawns a drop and particles
+
+    Args:
+        pos,
+        game_map,
+        particles,
+        drops,
+        tiles,
+        scrollx,
+        scrolly,
+        player,
+        nodrops=False,
+        nodistance=False
+    Returns:
+        game_map, particles, drops
+
+    """
+    # for some stupid fucking reason this is necessary to do in here
+    # otherwise the player object breaks
+    from entities import DroppedItem, Particle
+
+    # get true position from graphical coordinates
+    posx = pos[0] + scrollx
+    posy = pos[1] + scrolly
+    # proceed if the distance between the player and pos is at most 5 tiles
+    # or if the nodistance flag is enabled
+    if abs(posx - player.rect.centerx) < 5*TILE_SIZE or nodistance and abs(posy - player.rect.centery) < 5*TILE_SIZE or nodistance:
+        # get chunk
+        chunk = get_chunk(pos, game_map, scrollx, scrolly)
+        if chunk != None:
+            # loop throught tile in the chunk
+            for tile in game_map[chunk][0]:
+                tilerect = pygame.Rect(tile[0][0]*TILE_SIZE, tile[0][1]*TILE_SIZE, TILE_SIZE, TILE_SIZE)
+                # if a tile exists at pos remove it
+                if tilerect.collidepoint(posx, posy):
+                    game_map[chunk][0].remove(tile)
+                    # spawn drops if the nodrops flag isn't enabled
+                    if not nodrops:
+                        if tilerect in tiles:
+                            tiles.remove(tilerect)
+                        if tile[1] in ["dirt", "grass", "snowy grass"]:
+                            drops.append(DroppedItem(tilerect.x + 5, tilerect.y + 5, 0, 0, "dirt"))
+                        elif tile[1] in ["stone", "rock"]:
+                            drops.append(DroppedItem(tilerect.x + 5, tilerect.y + 5, 0, 0, "rock"))
+                        elif tile[1] in ["tree1", "tree2", "tree3", "tree4"]:
+                            drops.append(DroppedItem(tilerect.x + 5, tilerect.y + 5, 0, 0, "plank", random.randint(5, 15)))
+                            if tile[1] != "tree4" and random.randint(0, 1) == 1:
+                                drops.append(DroppedItem(tilerect.x + 5, tilerect.y + 5, 0, 0, "oak sapling", 1))
+                        elif tile[1] == "coal block":
+                            drops.append(DroppedItem(tilerect.x + 5, tilerect.y + 5, 0, 0, "coal"))
+                        else:
+                            drops.append(DroppedItem(tilerect.x + 5, tilerect.y + 5, 0, 0, tile[1]))
+                        
+                        # spawn particles with the color defaulting to brown
+                        particle_color = BROWN
+                        if tile[1] in ["stone", "rock", "coal block"]:
+                            particle_color = GRAY
+                        elif tile[1] in ["plant", "grass"]:
+                            particle_color = GRASSGREEN
+                        for i in range(10):
+                            particles.append(Particle(tilerect.centerx, tilerect.centery, particle_color))
+                        # play the breaking sound
+                        break_sound.play()
+                    break
+    return game_map, particles, drops
+
+def get_chunk(pos, game_map, scrollx, scrolly):
+    """
+    Get chunk based on coordinates (pos)
+    
+    Args:
+        pos, game_map, scrollx, scrolly
+    Returns:
+        chunk or None if no chunk exists
+    """
+    mousex = pos[0] + scrollx
+    mousey = pos[1] + scrolly
+    for chunk in game_map.keys():
+        # get chunk coordinates from the game_map keys (e.g. 0;0)
+        chunkx, chunky = chunk.split(";")
+        chunkx = int(chunkx) * TILE_SIZE * CHUNK_SIZE
+        chunky = int(chunky) * TILE_SIZE * CHUNK_SIZE
+        # create a rect object for the chunk and test for collisions with the mouse
+        chunkrect = pygame.Rect(chunkx, chunky, 8*TILE_SIZE, 8*TILE_SIZE)
+        if chunkrect.collidepoint(mousex, mousey):
+            return chunk
+
+def tile_exists(chunk, game_map, x, y):
+    """
+    Check if tile exists in the game map
+    Args:
+        chunk, game_map, x, y
+    Returns:
+        tiles or None
+    """
+    tiles = []
+    for tile in game_map[chunk][0]:
+        if tile[0][0] == x and tile[0][1] == y:
+            tiles.append(tile)
+    if tiles:
+        return tiles
+
+def place_tile(pos, blocktype, equipped, game_map, inventory, player, scrollx, scrolly, item_cost=True):
+    """
+    Places into a tile based on coordinates
+    Args (yeah there's a few):
+        pos, blocktype, equipped, game_map, inventory, player, scrollx, scrolly, item_cost=True
+    Returns:
+        game_map
+    """
+    
+    targettile = get_tile(pos, game_map, scrollx, scrolly)
+    furniture = False
+    if targettile != None:
+        # if the target tile is a plant, just remove it and place the tile
+        if targettile[1] == "plant":
+            pass
+            #remove_tile(pos)
+        # if the target tile is furniture e.g. a wall, torches and other stuff
+        # can be placed on it
+        elif ITEMS[targettile[1]]["furniture"] == True:
+            furniture = True
+        # if a tile already exists in the target location, do nothing
+        else:
+            return game_map
+    posx = pos[0] + scrollx
+    posy = pos[1] + scrolly
+    if abs(posx - player.rect.centerx) < 5*TILE_SIZE and abs(posy - player.rect.centery) < 5*TILE_SIZE:
+        chunk = get_chunk(pos, game_map, scrollx, scrolly)
+        chunkx, chunky = chunk.split(";")
+        # iterate through the chunk and generate rects for collision testing
+        for y_pos in range(CHUNK_SIZE):
+            for x_pos in range(CHUNK_SIZE):
+                target_x = int(chunkx) * CHUNK_SIZE * TILE_SIZE + x_pos * TILE_SIZE
+                target_y = int(chunky) * CHUNK_SIZE * TILE_SIZE + y_pos * TILE_SIZE
+                tilerect = pygame.Rect(target_x, target_y, TILE_SIZE, TILE_SIZE)
+                
+                if tilerect.collidepoint(posx, posy):
+                    target_block = [[target_x // TILE_SIZE, target_y // TILE_SIZE], blocktype]
+                    if tile_exists(chunk, game_map, target_x // TILE_SIZE, target_y // TILE_SIZE) == None:
+                        if not tilerect.colliderect(player.rect) or furniture == True:
+                            game_map[chunk][0].append(target_block)
+                            build_sound.play()
+                            if item_cost:
+                                remove_inventory_item(inventory, equipped, equipped, 1)
+                    else:
+                        if ITEMS[equipped]["furniture"] == True:
+                            existing_tiles = tile_exists(chunk, game_map, target_x // TILE_SIZE, target_y // TILE_SIZE)
+                            if len(existing_tiles) == 1:
+                                blockname = existing_tiles[0][1]
+                                if equipped != blockname:
+                                    if blockname == "plank wall":
+                                        game_map[chunk][0].append(target_block)
+                                        build_sound.play()
+                                        if item_cost:
+                                            remove_inventory_item(equipped, 1)
+    return game_map
+
+def get_tile(pos, game_map, scrollx, scrolly):
+    """
+    Gets a tile based on coordinates
+    Args:
+        pos, game_map
+    Returns:
+        tile or None if no tile is found
+    """
+    posx = pos[0] + scrollx
+    posy = pos[1] + scrolly
+    chunk = get_chunk(pos, game_map, scrollx, scrolly)
+    for tile in game_map[chunk][0]:
+        tilerect = pygame.Rect(tile[0][0]*TILE_SIZE, tile[0][1]*TILE_SIZE, TILE_SIZE, TILE_SIZE)
+        if tilerect.collidepoint(posx, posy):
+            return tile
+
+def draw_tile_outline(pos, equipped, game_map, buildables, display,
+                      player, scrollx, scrolly):
+    posx = pos[0] + scrollx
+    posy = pos[1] + scrolly
+    if abs(posx - player.rect.centerx) < 5*TILE_SIZE and abs(posy - player.rect.centery) < 5*TILE_SIZE and equipped != None and equipped != "":
+        if ITEMS[equipped]["tool"]:
+            tile = get_tile(pos, game_map, scrollx, scrolly)
+            if tile != None:
+                color = BLACK
+                drawrect = pygame.Rect(tile[0][0]*TILE_SIZE-scrollx, tile[0][1]*TILE_SIZE-scrolly, TILE_SIZE, TILE_SIZE)
+                #if current_biome == 3 or is_night and color == BLACK:
+                #    color = WHITE
+                pygame.draw.rect(display, color, drawrect, 1)
+        elif ITEMS[equipped]["build"]:
+            if get_next_tiles(pos, buildables, scrollx, scrolly) == True:
+                chunk = get_chunk(pos, game_map, scrollx, scrolly)
+                chunkx, chunky = chunk.split(";")
+                for y_pos in range(CHUNK_SIZE):
+                    for x_pos in range(CHUNK_SIZE):
+                        target_x = int(chunkx) * CHUNK_SIZE * TILE_SIZE + x_pos * TILE_SIZE
+                        target_y = int(chunky) * CHUNK_SIZE * TILE_SIZE + y_pos * TILE_SIZE
+                        tilerect = pygame.Rect(target_x, target_y, TILE_SIZE, TILE_SIZE)
+                        if tilerect.collidepoint(posx, posy):
+                            tilerect.x -= scrollx
+                            tilerect.y -= scrolly
+                            #if current_biome == 3 or is_night:
+                            #    color = WHITE
+                            #else:
+                            color = BLACK
+                            pygame.draw.rect(display, color, tilerect, 1)

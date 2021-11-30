@@ -7,13 +7,13 @@ Sovellus on 2D selviytymispeli, jossa pelaaja seikkailee neliöistä koostuvasta
 ## Perustoiminnallisuudet
 
 * Pelaaja pystyy:
-	* liikkumaan ja hyppimään
-	* rikkomaan ja asettamaan neliöitä
+	* liikkumaan ja hyppimään (tehty)
+	* rikkomaan ja asettamaan neliöitä (tehty)
 	* vahingoittamaan vihollisia
 	* kuolemaan (resetoi pelaajan sijainnin alkuun)
 * Pelissä tulee olla ajoittain ilmestyviä vihollisia, jotka yrittävät hyökätä pelaajan kimppuun
-* Inventory järjestelmä
-* perlin noisella generoitu maailma
+* Inventory järjestelmä (tehty)
+* perlin noisella generoitu maailma (tehty)
 
 ## Jatkokehitysideoita
 
@@ -22,7 +22,7 @@ Sovellus on 2D selviytymispeli, jossa pelaaja seikkailee neliöistä koostuvasta
 * Vuorokausisykli
 * Puiden ja mahdollisesti muiden kasvien kasvattaminen
 * Bossi
-* Lämpökartta (heat map), jonka perusteella luodaan erilaisia biomeita
+* Lämpökartta (heat map), jonka perusteella luodaan erilaisia biomeita (tehty)
 * Aloitusvalikko
 * Pausevalikko
 
