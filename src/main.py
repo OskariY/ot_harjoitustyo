@@ -146,14 +146,6 @@ def main():
                     if tile[1] in ["stone","dirt","grass","snowy grass","plank","rock","coal block","slab"]:
                         tiles.append(pygame.Rect(tile[0][0]*TILE_SIZE,tile[0][1]*TILE_SIZE,TILE_SIZE,TILE_SIZE))
 
-                    if tile[1] in ["oak sapling"]:
-                        sapling_exists = False
-                        for sapling in saplings:
-                            if sapling[0] == [tile[0][0]*TILE_SIZE,tile[0][1]*TILE_SIZE]:
-                                sapling_exists = True
-                        if not sapling_exists:
-                            saplings.append([[tile[0][0]*TILE_SIZE,tile[0][1]*TILE_SIZE], 1000])
-
                     buildables.append(pygame.Rect(tile[0][0]*TILE_SIZE,tile[0][1]*TILE_SIZE,TILE_SIZE,TILE_SIZE))
 
         # event loop
@@ -316,6 +308,7 @@ def main():
 
         for particle in particles:
             particle.update(display, particles, scrollx, scrolly)
+
 
         # draw inventory
         if inv_open:
