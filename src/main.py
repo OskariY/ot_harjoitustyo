@@ -19,9 +19,9 @@ display = pygame.Surface((DISPLAY_WIDTH, DISPLAY_HEIGHT))
 pygame.display.set_caption("Northlands: unspaghettified")
 # import functions, classes and resources (images, sound etc.) needed
 from resources import ITEMS, background_image, tree_image, jump_sound, break_sound
-from functions import print_text, add_to_inventory, generate_chunk, in_inventory, remove_tile, equip_item, remove_inventory_item, get_tile, place_tile, inventory_drag, get_next_tiles, draw_tile_outline
+from functions import print_text, generate_chunk, remove_tile, get_tile, place_tile, get_next_tiles, draw_tile_outline
 from entities import Player, Particle, FadingText
-
+from inventory import Inventory
 
 def main():
     # pygame clock
@@ -48,32 +48,14 @@ def main():
     scrolly = 0
 
     # inventory related variables
-    inv_surf = pygame.Surface((300, 32*6+2))
-    invx = CENTER[0] - inv_surf.get_width() // 2
-    invy = CENTER[1] - inv_surf.get_height() // 2
+    inventory = Inventory()
     inv_open = False
-    inv_select1 = None
-    inv_select2 = None
-    equipped = ""
-
-    inventory = [] # format: [ [rect, item, amount, equipped] ]
-    x = 2
-    y = 2
-    for i in range(30):
-        inventory.append([pygame.Rect(x, y, 30, 30), "", 0, False])
-        x += 32
-        if x > 150:
-            x = 2
-            y += 32
+    
     # add some basic items to the inventory
-    inventory = add_to_inventory(inventory, "axe", 1)
-    inventory = add_to_inventory(inventory, "pickaxe", 1)
-    inventory = add_to_inventory(inventory, "shovel", 1)
-    inventory = add_to_inventory(inventory, "plank", 100)
-
-    # hotbar
-    hotbar_surf = pygame.Surface((32*5+4, 34))
-    hotbar_x = CENTER[0] - hotbar_surf.get_width() // 2
+    inventory.add_to_inventory("axe", 1)
+    inventory.add_to_inventory("pickaxe", 1)
+    inventory.add_to_inventory("shovel", 1)
+    inventory.add_to_inventory("plank", 100)
 
     # tile breaking related variables
     selected_tile = None
@@ -181,15 +163,15 @@ def main():
                         inv_open = False
                 # equip items in the hotbar
                 if event.key == pygame.K_1:
-                    inventory, equipped = equip_item(inventory, equipped, 0)
+                    inventory.equip_item(0)
                 if event.key == pygame.K_2:
-                    inventory, equipped = equip_item(inventory, equipped, 1)
+                    inventory.equip_item(1)
                 if event.key == pygame.K_3:
-                    inventory, equipped = equip_item(inventory, equipped, 2)
+                    inventory.equip_item(2)
                 if event.key == pygame.K_4:
-                    inventory, equipped = equip_item(inventory, equipped, 3)
+                    inventory.equip_item(3)
                 if event.key == pygame.K_5:
-                    inventory, equipped = equip_item(inventory, equipped, 4)
+                    inventory.equip_item(4)
                 
             if event.type == pygame.KEYUP:
                     if event.key == pygame.K_d:
@@ -202,45 +184,45 @@ def main():
                 if inv_open:
                     if event.button == 1:
                         # moving items in the inventory
-                        for i, item in enumerate(inventory):
+                        for i, item in enumerate(inventory.inventory):
                             testrect = item[0].copy()
-                            testrect.x += invx
-                            testrect.y += invy
+                            testrect.x += inventory.invx
+                            testrect.y += inventory.invy
                             if testrect.collidepoint(mousepos):
-                                if inventory[i][1] != "":
-                                    inv_select1 = i
+                                if inventory.inventory[i][1] != "":
+                                    inventory.inv_select1 = i
                                     break
                 # regular mouse countrols
                 else:
                     if event.button == 1:
-                        if equipped != "" and equipped != None:
+                        if inventory.equipped != "" and inventory.equipped != None:
                             # if item is food, heal player
-                            if ITEMS[equipped]["food"] and player.health < player.max_health:
-                                if player.health + ITEMS[equipped]["heal"] > player.max_health:
+                            if ITEMS[inventory.equipped]["food"] and player.health < player.max_health:
+                                if player.health + ITEMS[inventory.equipped]["heal"] > player.max_health:
                                     player.health = player.max_health
                                 else:
-                                    player.health += ITEMS[equipped]["heal"]
-                                inventory, equipped = remove_inventory_item(equipped, 1)
-                                popups.append(FadingText(player.rect.centerx, player.rect.top, "+{} HP".format(str(ITEMS[equipped]["heal"])), GRASSGREEN))
+                                    player.health += ITEMS[inventory.equipped]["heal"]
+                                inventory.remove_item(inventory.equipped, 1)
+                                popups.append(FadingText(player.rect.centerx, player.rect.top, "+{} HP".format(str(ITEMS[inventory.equipped]["heal"])), GRASSGREEN))
                             # tool logic
-                            if ITEMS[equipped]["tool"] and in_inventory(inventory, equipped):
-                                #player.hit(equipped, mobs, worms, mousex, mousey)
+                            if ITEMS[inventory.equipped]["tool"] and inventory.in_inventory(inventory.equipped):
+                                #player.hit(inventory.equipped, mobs, worms, mousex, mousey)
                                 breaking_tile = get_tile(mousepos, game_map, scrollx, scrolly)
                                 if selected_tile != breaking_tile:
                                     selected_tile = breaking_tile
                                     tile_hits_left = 10
                                 if breaking_tile != None:
                                     # reduce tile_hits_left based on the tool and the tile
-                                    if equipped == "pickaxe" and breaking_tile[1] in ["stone", "coal block"]:
+                                    if inventory.equipped == "pickaxe" and breaking_tile[1] in ["stone", "coal block"]:
                                         if breaking_tile[1] == "stone":
                                             tile_hits_left -= 5
                                         if breaking_tile[1] == "coal block":
                                             tile_hits_left -= 2
-                                    elif equipped == "shovel" and breaking_tile[1] in ["dirt", "grass", "snowy grass"]:
+                                    elif inventory.equipped == "shovel" and breaking_tile[1] in ["dirt", "grass", "snowy grass"]:
                                         tile_hits_left -= 5
-                                    elif equipped == "axe" and breaking_tile[1] in ["tree1", "tree2", "tree3", "tree4"]:
+                                    elif inventory.equipped == "axe" and breaking_tile[1] in ["tree1", "tree2", "tree3", "tree4"]:
                                             tile_hits_left -= 2
-                                    elif equipped == "axe" and breaking_tile[1] in ["plank", "plank wall", "slab"]:
+                                    elif inventory.equipped == "axe" and breaking_tile[1] in ["plank", "plank wall", "slab"]:
                                         tile_hits_left -= 5
                                     elif breaking_tile[1] in ["plant", "torch"]:
                                         tile_hits_left = 0
@@ -261,7 +243,7 @@ def main():
 
                                     for i in range(10):
                                         particles.append(Particle(breaking_tile[0][0]*TILE_SIZE+8, breaking_tile[0][1]*TILE_SIZE+8, particle_color))
-                                    #player.chop(items[equipped]["image"])
+                                    #player.chop(items[inventory.equipped]["image"])
 
                                     if tile_hits_left <= 0:
                                         selected_tile = None
@@ -269,14 +251,14 @@ def main():
                                         remove_tile(mousepos, game_map, particles, drops, tiles, scrollx, scrolly, player)
 
                     if event.button == 3:
-                        if equipped != "":
+                        if inventory.equipped != "":
                             # place tiles
-                            if ITEMS[equipped]["build"] and in_inventory(inventory, equipped):
+                            if ITEMS[inventory.equipped]["build"] and inventory.in_inventory(inventory.equipped):
                                 if get_next_tiles(mousepos, buildables, scrollx, scrolly) == True:
-                                    game_map = place_tile(mousepos, equipped, equipped, 
+                                    game_map = place_tile(mousepos, inventory.equipped, inventory.equipped, 
                                                           game_map, inventory, player, 
                                                           scrollx, scrolly)
-                            # elif equipped == "hoe" and get_tile(mousepos)[1] == "dirt":
+                            # elif inventory.equipped == "hoe" and get_tile(mousepos)[1] == "dirt":
                             #     remove_tile(mousepos, True)
                             #     place_tile(mousepos, "grass", False)
             if event.type == pygame.MOUSEBUTTONUP:
@@ -285,15 +267,15 @@ def main():
                     if event.button == 1:
                        # loop through the inventory grid and test for collisions
                        # if mouse collides with an inventory slot call the inventory drag function
-                       for i, item in enumerate(inventory):
+                       for i, item in enumerate(inventory.inventory):
                             testrect = item[0].copy()
-                            testrect.x += invx
-                            testrect.y += invy
+                            testrect.x += inventory.invx
+                            testrect.y += inventory.invy
                             if testrect.collidepoint(mousepos):
-                                inv_select2 = i
-                                inventory = inventory_drag(inv_select1, inv_select2, inventory)
-                                inv_select1 = None
-                                inv_select2 = None
+                                inventory.inv_select2 = i
+                                inventory.inventory_drag()
+                                inventory.inv_select1 = None
+                                inventory.inv_select2 = None
 
         # drawing and updating game entities like the player
         player.draw(display, scrollx, scrolly)
@@ -312,52 +294,11 @@ def main():
 
 
         # draw inventory
-        if inv_open:
-            inv_surf.fill(GRAY)
-            x = 2
-            y = 2
-            # draw inventory grid
-            for i in range(30):
-                # draw hotbar with a different color
-                if i < 5:
-                    pygame.draw.rect(inv_surf, BLACK, inventory[i][0], 1)
-                # draw other inventory slots
-                else:
-                    pygame.draw.rect(inv_surf, WHITE, inventory[i][0], 1)
-                # if the slot contains an item, draw it along with text
-                if inventory[i][1]:
-                    inv_surf.blit(pygame.transform.scale(ITEMS[inventory[i][1]]["image"], (TILE_SIZE, TILE_SIZE)), (x + 2, y + 2))
-                    print_text(str(inventory[i][2]), x + 29, y, inv_surf, 2, 8)
-                    print_text(str(inventory[i][1][:8]), x + 16, y + 19, inv_surf, 1, 8)
+        inventory.draw(inv_open, display, mousepos)
 
-                x += 32
-                if x > 150:
-                    x = 2
-                    y += 32
-            # draw the inventory surface to the display
-            display.blit(inv_surf, (invx, invy))
-            # draw dragging items in inventory
-            if inv_select1 != '' and inv_select1 != None and inventory[inv_select1][1] != None:
-                display.blit(ITEMS[inventory[inv_select1][1]]["image"], mousepos)
-        # draw hotbar if inventory isn't open
-        else:
-            hotbar_surf.fill(GRAY)
-            x = 2
-            y = 2
-            for i in range(5):
-                if inventory[i][3]:
-                    pygame.draw.rect(hotbar_surf, BLACK, pygame.Rect(x, y, 30, 30), 1)
-                else:
-                    pygame.draw.rect(hotbar_surf, WHITE, pygame.Rect(x, y, 30, 30), 1)
-                if inventory[i][1]:
-                    hotbar_surf.blit(ITEMS[inventory[i][1]]["image"], (x + 8, y + 8))
-                    print_text(str(inventory[i][2]), x + 29, y, hotbar_surf, 2, 8, WHITE)
-
-                x += 32
-
-            # draw tile outlines
-            draw_tile_outline(mousepos, equipped, game_map, buildables, display, player, scrollx, scrolly)
-            display.blit(hotbar_surf, (hotbar_x, 0))
+        # draw tile outlines
+        if not inv_open:
+            draw_tile_outline(mousepos, inventory.equipped, game_map, buildables, display, player, scrollx, scrolly)
 
 
         # draw display surface onto screen, update it and clock the fps
