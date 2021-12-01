@@ -8,8 +8,8 @@ class Inventory():
         self.surface = pygame.Surface((300, 32*6+2))
         self.invx = CENTER[0] - self.surface.get_width() // 2
         self.invy = CENTER[1] - self.surface.get_height() // 2
-        self.inv_select1 = ""
-        self.inv_select2 = ""
+        self.inv_select1 = -1
+        self.inv_select2 = -1
         self.equipped = ""
 
         self.inventory = [] # format: [ [rect, item, amount, equipped] ]
@@ -25,8 +25,6 @@ class Inventory():
         # hotbar
         self.hotbar_surf = pygame.Surface((32*5+4, 34))
         self.hotbar_x = CENTER[0] - self.hotbar_surf.get_width() // 2
-
-
 
     def draw(self, inv_open, display, mousepos):
         if inv_open:
@@ -54,7 +52,7 @@ class Inventory():
             # draw the inventory surface to the display
             display.blit(self.surface, (self.invx, self.invy))
             # draw dragging items in inventory
-            if self.inv_select1 != '' and self.inv_select1 != None and self.inventory[self.inv_select1][1] != "":
+            if self.inv_select1 != -1 and self.inventory[self.inv_select1][1] != "":
                 display.blit(ITEMS[self.inventory[self.inv_select1][1]]["image"], mousepos)
         # draw hotbar if inventory isn't open
         else:
@@ -135,8 +133,7 @@ class Inventory():
         """
         Drags items around the inventory
         """
-
-        if self.inv_select1 != "" and self.inv_select2 != "" and self.inv_select1 != self.inv_select2:
+        if self.inv_select1 != -1 and self.inv_select2 != -1 and self.inv_select1 != self.inv_select2:
             # if destination item is same as beginning item
             if self.inventory[self.inv_select1][1] == self.inventory[self.inv_select2][1]:
                 # if destination + beginning is more than the stack limit
@@ -157,6 +154,8 @@ class Inventory():
                 self.inventory[self.inv_select2][2] = self.inventory[self.inv_select1][2]
                 self.inventory[self.inv_select1][1] = temp1
                 self.inventory[self.inv_select1][2] = temp2
+            self.inv_select1 = -1
+            self.inv_select2 = -1
 
     def in_inventory(self, item, amount=1):
         """

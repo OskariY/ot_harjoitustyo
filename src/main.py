@@ -274,8 +274,8 @@ def main():
                             if testrect.collidepoint(mousepos):
                                 inventory.inv_select2 = i
                                 inventory.inventory_drag()
-                                inventory.inv_select1 = ""
-                                inventory.inv_select2 = ""
+                                inventory.inv_select1 = -1
+                                inventory.inv_select2 = -1
 
         # drawing and updating game entities like the player
         player.draw(display, scrollx, scrolly)
