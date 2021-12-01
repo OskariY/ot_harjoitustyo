@@ -185,6 +185,6 @@ class Inventory():
         for i, item in enumerate(self.inventory):
             if i == index:
                 item[3] = True
-                equipped = self.inventory[index][1]
+                self.equipped = self.inventory[index][1]
             else:
                 item[3] = False

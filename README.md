@@ -42,6 +42,17 @@ Ohjelman pystyy suorittamaan komennolla:
 poetry run invoke start
 ```
 
+### Kontrollit
+A: liiku vasemmalle
+D: liiku oikealle
+W: hyppää
+
+TAB: avaa/sulje inventory
+
+MOUSE1: riko palikoita, lyö
+MOUSE2: aseta palikoita (pitää olla valittuna)
+
+
 ### Testaus
 
 Testit suoritetaan komennolla:

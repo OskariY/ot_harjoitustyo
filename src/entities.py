@@ -2,7 +2,7 @@ import pygame
 import random
 from resources import ITEMS, player_images, death_sound
 from settings import TILE_SIZE, BLACK, RED, GREEN, DISPLAY_WIDTH, DISPLAY_HEIGHT
-from functions import move, print_text, add_to_inventory
+from functions import move, print_text 
 
 class Player():
     def __init__(self, x, y):
@@ -54,7 +54,7 @@ class Player():
         for drop in list(drops):
             if self.rect.colliderect(drop.rect):
                 popups.append(FadingText(self.rect.centerx, self.rect.top, "+{} x {}".format(drop.amount, drop.item)))
-                add_to_inventory(inventory, drop.item, drop.amount)
+                inventory.add_to_inventory(drop.item, drop.amount)
                 drops.remove(drop)
 
 
