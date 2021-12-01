@@ -8,8 +8,8 @@ class Inventory():
         self.surface = pygame.Surface((300, 32*6+2))
         self.invx = CENTER[0] - self.surface.get_width() // 2
         self.invy = CENTER[1] - self.surface.get_height() // 2
-        self.inv_select1 = None
-        self.inv_select2 = None
+        self.inv_select1 = ""
+        self.inv_select2 = ""
         self.equipped = ""
 
         self.inventory = [] # format: [ [rect, item, amount, equipped] ]
@@ -54,7 +54,7 @@ class Inventory():
             # draw the inventory surface to the display
             display.blit(self.surface, (self.invx, self.invy))
             # draw dragging items in inventory
-            if self.inv_select1 != '' and self.inv_select1 != None and self.inventory[self.inv_select1][1] != None:
+            if self.inv_select1 != '' and self.inv_select1 != None and self.inventory[self.inv_select1][1] != "":
                 display.blit(ITEMS[self.inventory[self.inv_select1][1]]["image"], mousepos)
         # draw hotbar if inventory isn't open
         else:
@@ -135,35 +135,28 @@ class Inventory():
         """
         Drags items around the inventory
         """
-        
-        if self.inv_select1 != None and self.inv_select2 != None and self.inv_select1 != self.inv_select2:
-            # if destination is empty, move item
-            if self.inventory[self.inv_select2][1] == None:
+
+        if self.inv_select1 != "" and self.inv_select2 != "" and self.inv_select1 != self.inv_select2:
+            # if destination item is same as beginning item
+            if self.inventory[self.inv_select1][1] == self.inventory[self.inv_select2][1]:
+                # if destination + beginning is more than the stack limit
+                if self.inventory[self.inv_select2][2] + self.inventory[self.inv_select1][2] > ITEMS[self.inventory[self.inv_select2][1]]["stack"]:
+                    minus = ITEMS[self.inventory[self.inv_select2][1]]["stack"] - self.inventory[self.self.inv_select2][2]
+                    self.inventory[self.inv_select2][2] = ITEMS[self.inventory[self.inv_select2][1]]["stack"]
+                    self.inventory[self.inv_select1][2] -= minus
+
+                # stack
+                else:
+                    self.inventory[self.inv_select2][2] += self.inventory[self.inv_select1][2]
+                    self.inventory[self.inv_select1][1] = ""
+                    self.inventory[self.inv_select1][2] = 0
+            else:
+                temp1 = self.inventory[self.inv_select2][1]
+                temp2 = self.inventory[self.inv_select2][2]
                 self.inventory[self.inv_select2][1] = self.inventory[self.inv_select1][1]
                 self.inventory[self.inv_select2][2] = self.inventory[self.inv_select1][2]
-                self.inventory[self.inv_select1][1] = None
-                self.inventory[self.inv_select1][2] = 0
-            else:
-                # if destination item is same as beginning item
-                if self.inventory[self.inv_select1][1] == self.inventory[self.inv_select2][1]:
-                    # if destination + beginning is more than the stack limit
-                    if self.inventory[self.inv_select2][2] + self.inventory[self.inv_select1][2] > ITEMS[self.inventory[self.inv_select2][1]]["stack"]:
-                        minus = ITEMS[self.inventory[self.inv_select2][1]]["stack"] - self.inventory[self.self.inv_select2][2]
-                        self.inventory[self.inv_select2][2] = ITEMS[self.inventory[self.inv_select2][1]]["stack"]
-                        self.inventory[self.inv_select1][2] -= minus
-
-                    # stack
-                    else:
-                        self.inventory[self.inv_select2][2] += self.inventory[self.inv_select1][2]
-                        self.inventory[self.inv_select1][1] = None
-                        self.inventory[self.inv_select1][2] = 0
-                else:
-                    temp1 = self.inventory[self.inv_select2][1]
-                    temp2 = self.inventory[self.inv_select2][2]
-                    self.inventory[self.inv_select2][1] = self.inventory[self.inv_select1][1]
-                    self.inventory[self.inv_select2][2] = self.inventory[self.inv_select1][2]
-                    self.inventory[self.inv_select1][1] = temp1
-                    self.inventory[self.inv_select1][2] = temp2
+                self.inventory[self.inv_select1][1] = temp1
+                self.inventory[self.inv_select1][2] = temp2
 
     def in_inventory(self, item, amount=1):
         """

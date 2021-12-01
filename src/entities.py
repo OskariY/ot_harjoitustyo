@@ -1,15 +1,15 @@
-import pygame
 import random
+import pygame
 from resources import ITEMS, player_images, death_sound
 from settings import TILE_SIZE, BLACK, RED, GREEN, DISPLAY_WIDTH, DISPLAY_HEIGHT
-from functions import move, print_text 
+from functions import move, print_text
 
 class Player():
     def __init__(self, x, y):
         self.rect = pygame.Rect(x, y, TILE_SIZE, TILE_SIZE)
         self.hitrect = pygame.Rect(x, y, TILE_SIZE, TILE_SIZE)
 
-        self.original_image = player_images[0] 
+        self.original_image = player_images[0]
         self.image = self.original_image
         self.collisions = {
             "right": False,
@@ -53,11 +53,10 @@ class Player():
         # drop collisions
         for drop in list(drops):
             if self.rect.colliderect(drop.rect):
-                popups.append(FadingText(self.rect.centerx, self.rect.top, "+{} x {}".format(drop.amount, drop.item)))
+                popups.append(FadingText(self.rect.centerx, 
+                                         self.rect.top, "+{} x {}".format(drop.amount, drop.item)))
                 inventory.add_to_inventory(drop.item, drop.amount)
                 drops.remove(drop)
-
-
 
         if self.sound_cooldown > 0:
             self.sound_cooldown -= 1
