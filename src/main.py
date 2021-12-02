@@ -11,41 +11,38 @@ import sys
 import random
 
 # import constants/settings
-from settings import WINDOW_WIDTH, WINDOW_HEIGHT, DISPLAY_WIDTH, DISPLAY_HEIGHT, CENTER, WHITE, FPS, CHUNK_SIZE, TILE_SIZE, GRAY, BLACK, BROWN, GRASSGREEN
+from settings import WINDOW_WIDTH, WINDOW_HEIGHT, DISPLAY_WIDTH, DISPLAY_HEIGHT, WHITE, FPS, CHUNK_SIZE, TILE_SIZE, GRAY, BROWN, GRASSGREEN, MUSIC, CENTER
+
+# handle arguments
+for arg in sys.argv:
+    if "--nomusic" in arg:
+        MUSIC = False
+    if "--resolution" in arg:
+        resolution = arg.split("=")[1].split("x")
+        WINDOW_WIDTH = int(resolution[0])
+        WINDOW_HEIGHT = int(resolution[1])
+
 # intialize pygame and set up display
 pygame.init()
 screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 display = pygame.Surface((DISPLAY_WIDTH, DISPLAY_HEIGHT))
 pygame.display.set_caption("Northlands: unspaghettified")
 # import functions, classes and resources (images, sound etc.) needed
-from resources import ITEMS, background_image, tree_image, jump_sound, break_sound
-from functions import print_text, generate_chunk, remove_tile, get_tile, place_tile, get_next_tiles, draw_tile_outline
+from resources import ITEMS, tree_image, jump_sound, break_sound
 from entities import Player, Particle, FadingText
 from inventory import Inventory
+from functions import print_text
+from world import World
 
 def main():
     # pygame clock
     clock = pygame.time.Clock()
 
-    # object lists for updating and drawing
-    mobs = []
-    worms = []
-    entities = []
-    particles = []
-    popups = []
-    drops = []
+    # world object
+    world = World()
 
-    # world variables
-    game_map = {}
-    spawn_x = -100
-    spawn_y = 0
-    seed = random.randint(-999999, 999999)
-    current_biome = 1
-
-    # player object and scroll variables
-    player = Player(spawn_x, spawn_y)
-    scrollx = 0
-    scrolly = 0
+    # player object
+    player = Player(world.spawn_x, world.spawn_y)
 
     # inventory related variables
     inventory = Inventory()
@@ -60,6 +57,16 @@ def main():
     # tile breaking related variables
     selected_tile = None
     tile_hits_left = 10
+    
+    # if MUSIC setting is True, play music indefinately
+    if MUSIC:
+        pygame.mixer.music.play(-1)
+
+    help_dismissed = 250 
+    help_text = ["WASD: move and jump", 
+                 "Mouse1: break block with tools",  
+                 "Mouse2: place block", 
+                 "1-6: select hotbar items"]
 
     # game loop
     while True:
@@ -69,67 +76,12 @@ def main():
         mousex = mousex/(WINDOW_WIDTH/DISPLAY_WIDTH)
         mousey = mousey/(WINDOW_HEIGHT/DISPLAY_HEIGHT)
         mousepos = (mousex, mousey)
+        truemousepos = (mousex + world.scrollx, mousey + world.scrolly)
 
-        # smoothly scroll camera towards the player
-        scrollx += round((player.rect.centerx-scrollx-DISPLAY_WIDTH//2) / 20)
-        scrolly += round((player.rect.centery-scrolly-DISPLAY_HEIGHT//2) / 20)
-
-        # clear lists affected by the world generation loop
-        tiles = []
-        buildables = []
-        glows = []
-        slabs = []
-        entities = []
-
-        # draw background image
-        display.blit(background_image, (0, 0))
-
-
-        # world generation
-        for x in range(6):
-            for y in range(5):
-                # define the target chunk and check if it exists in the game map
-                # if so get it else generate it
-                target_x = x - 1 + int(round(scrollx/(CHUNK_SIZE*TILE_SIZE)))
-                target_y = y - 1 + int(round(scrolly/(CHUNK_SIZE*TILE_SIZE)))
-                target_chunk = str(target_x) + ';' + str(target_y)
-                if target_chunk not in game_map:
-                    game_map[target_chunk] = generate_chunk(target_x, target_y, seed)
-                # go through all tiles in the target chunk
-                for tile in game_map[target_chunk][0]:
-#                    if tile[1] == "torch":
-#                        glows.append((tile[0][0]*TILE_SIZE-scrollx-glowradius+TILE_SIZE//2,tile[0][1]*TILE_SIZE-scrolly-glowradius+TILE_SIZE//2))
-
-                    if tile[1] == "slab":
-                        slabs.append(pygame.Rect(tile[0][0]*TILE_SIZE,tile[0][1]*TILE_SIZE,TILE_SIZE,TILE_SIZE))
-
-                    if tile[1] in ["tree1", "tree2", "tree3", "tree4"]:
-                        # drawing trees
-                        display.blit(ITEMS[tile[1]]["image"],(tile[0][0]*TILE_SIZE-scrollx-tree_image.get_width() // 2 + 8,tile[0][1]*TILE_SIZE-scrolly-tree_image.get_height()+TILE_SIZE))
-                    else:
-                        # drawing everything else
-                        display.blit(ITEMS[tile[1]]["image"],(tile[0][0]*TILE_SIZE-scrollx,tile[0][1]*TILE_SIZE-scrolly))
-
-                    # mob spawns, when I get around to adding the mob classes
-                    # BROKEN CODE, FIX!!
-#                    if MOB_SPAWNS:
-#                        if tile[1] == "snowy grass":
-#                            if random.randint(1, 30000) == 1:
-#                                if tile[0][0]*TILE_SIZE < player.rect.x - 100 or tile[0][0]*TILE_SIZE > player.rect.x + 100:
-#                                    print("bear spawned, mobs: {}".format(len(mobs)))
-#                                    mobs.append(WalkingMob(tile[0][0]*TILE_SIZE, tile[0][1]*TILE_SIZE-48, 1))
-#                        if is_night == True:
-#                            if tile[1] in ["snowy grass", "grass"]:
-#                                if random.randint(1, 10000) == 1:
-#                                    if tile[0][0]*TILE_SIZE < player.rect.x - 100 or tile[0][0]*TILE_SIZE > player.rect.x + 100:
-#                                        print("skeleton spawned, mobs: {}".format(len(mobs)))
-#                                        mobs.append(WalkingMob(tile[0][0]*TILE_SIZE, tile[0][1]*TILE_SIZE-48, 2))
-#
-                    # physics
-                    if tile[1] in ["stone","dirt","grass","snowy grass","plank","rock","coal block","slab"]:
-                        tiles.append(pygame.Rect(tile[0][0]*TILE_SIZE,tile[0][1]*TILE_SIZE,TILE_SIZE,TILE_SIZE))
-
-                    buildables.append(pygame.Rect(tile[0][0]*TILE_SIZE,tile[0][1]*TILE_SIZE,TILE_SIZE,TILE_SIZE))
+        # update world variables (e.g. scroll)
+        world.update(mousepos, player)  
+        # generate world
+        world.generate_world(display)
 
         # event loop
         for event in pygame.event.get():
@@ -203,11 +155,15 @@ def main():
                                 else:
                                     player.health += ITEMS[inventory.equipped]["heal"]
                                 inventory.remove_item(inventory.equipped, 1)
-                                popups.append(FadingText(player.rect.centerx, player.rect.top, "+{} HP".format(str(ITEMS[inventory.equipped]["heal"])), GRASSGREEN))
+                                world.popups.append(FadingText(player.rect.centerx, 
+                                                    player.rect.top, 
+                                                    "+{} HP".format(str(ITEMS[inventory.equipped]["heal"])), 
+                                                    GRASSGREEN,
+                                                    world.current_biome))
                             # tool logic
                             if ITEMS[inventory.equipped]["tool"] and inventory.in_inventory(inventory.equipped):
                                 #player.hit(inventory.equipped, mobs, worms, mousex, mousey)
-                                breaking_tile = get_tile(mousepos, game_map, scrollx, scrolly)
+                                breaking_tile = world.get_tile(truemousepos)
                                 if selected_tile != breaking_tile:
                                     selected_tile = breaking_tile
                                     tile_hits_left = 10
@@ -242,22 +198,23 @@ def main():
                                         particle_color = BROWN
 
                                     for i in range(10):
-                                        particles.append(Particle(breaking_tile[0][0]*TILE_SIZE+8, breaking_tile[0][1]*TILE_SIZE+8, particle_color))
+                                        world.particles.append(Particle(breaking_tile[0][0]*TILE_SIZE+8, breaking_tile[0][1]*TILE_SIZE+8, particle_color))
                                     #player.chop(items[inventory.equipped]["image"])
 
                                     if tile_hits_left <= 0:
                                         selected_tile = None
                                         tile_hits_left = 10
-                                        remove_tile(mousepos, game_map, particles, drops, tiles, scrollx, scrolly, player)
+                                        world.remove_tile(truemousepos, player)
 
                     if event.button == 3:
                         if inventory.equipped != "":
                             # place tiles
                             if ITEMS[inventory.equipped]["build"] and inventory.in_inventory(inventory.equipped):
-                                if get_next_tiles(mousepos, buildables, scrollx, scrolly) == True:
-                                    game_map = place_tile(mousepos, inventory.equipped, inventory.equipped, 
-                                                          game_map, inventory, player, 
-                                                          scrollx, scrolly)
+                                if world.get_next_tiles(truemousepos) == True:
+                                    world.place_tile(truemousepos, 
+                                                     inventory.equipped,
+                                                     inventory,
+                                                     player)
                             # elif inventory.equipped == "hoe" and get_tile(mousepos)[1] == "dirt":
                             #     remove_tile(mousepos, True)
                             #     place_tile(mousepos, "grass", False)
@@ -278,19 +235,19 @@ def main():
                                 inventory.inv_select2 = -1
 
         # drawing and updating game entities like the player
-        player.draw(display, scrollx, scrolly)
-        player.update(inventory, tiles, mobs, drops, popups, slabs)
+        player.draw(display, world.scrollx, world.scrolly)
+        player.update(inventory, world)
 
-        for drop in drops:
-            drop.update(tiles, scrollx, scrolly)
-            drop.draw(display, scrollx, scrolly)
+        for drop in world.drops:
+            drop.update(world)
+            drop.draw(display, world.scrollx, world.scrolly)
 
-        for popup in popups:
-            popup.update(popups)
-            popup.draw(display,scrollx, scrolly)
+        for popup in world.popups:
+            popup.update(world.popups)
+            popup.draw(display,world.scrollx, world.scrolly)
 
-        for particle in particles:
-            particle.update(display, particles, scrollx, scrolly)
+        for particle in world.particles:
+            particle.update(display, world.particles, world.scrollx, world.scrolly)
 
 
         # draw inventory
@@ -298,8 +255,28 @@ def main():
 
         # draw tile outlines
         if not inv_open:
-            draw_tile_outline(mousepos, inventory.equipped, game_map, buildables, display, player, scrollx, scrolly)
-
+            world.draw_tile_outline(truemousepos, inventory.equipped, display, player)
+       
+        if world.current_biome == 1:
+            biomename = "Forest"
+        elif world.current_biome == 2:
+            biomename = "Tundra"
+        elif world.current_biome == 3:
+            biomename = "Cave"
+        else:
+            biomename = world.current_biome
+        
+        if help_dismissed > 0:
+            help_dismissed -= 1
+            help_x = CENTER[0] - 96 
+            help_y = CENTER[1] - 64
+            print_text("Controls:", CENTER[0], help_y - 20, display, 1, 18)
+            for t in help_text:
+                print_text(t, help_x, help_y, display, 0, 18)
+                help_y += 18
+        else:
+            print_text(f"biome: {biomename}", 0, 0, display, 0, 16)
+            print_text(f"FPS: {int(clock.get_fps())}", 400, 0, display, 2, 16)
 
         # draw display surface onto screen, update it and clock the fps
         screen.blit(pygame.transform.scale(display, (WINDOW_WIDTH, WINDOW_HEIGHT)), (0, 0))
@@ -308,5 +285,4 @@ def main():
 
 
 if __name__ == "__main__":
-    pygame.mixer.music.play(-1)
     main()

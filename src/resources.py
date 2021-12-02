@@ -7,7 +7,7 @@ IMAGES_DIR = "src/images/"
 
 # music and sounds
 pygame.mixer.init()
-pygame.mixer.music.set_volume(0.5)
+pygame.mixer.music.set_volume(1.0)
 
 
 pygame.mixer.music.load(f"{MUSIC_DIR}oyho.ogg")
@@ -205,7 +205,7 @@ ITEMS = {
         "tool": False,
         "furniture": False,
         },
-    "oak sapling": {
+    "sapling": {
         "image": sapling_image,
         "stack": 999,
         "food": False,

@@ -42,7 +42,7 @@ class Player():
 
         self.falling = False
 
-    def update(self, inventory, tiles, mobs, drops, popups, slabs):
+    def update(self, inventory, world):
         """
         updates the player object
 
@@ -51,12 +51,13 @@ class Player():
         """
         
         # drop collisions
-        for drop in list(drops):
+        for drop in list(world.drops):
             if self.rect.colliderect(drop.rect):
-                popups.append(FadingText(self.rect.centerx, 
-                                         self.rect.top, "+{} x {}".format(drop.amount, drop.item)))
+                world.popups.append(FadingText(self.rect.centerx, 
+                                               self.rect.top, "+{} x {}".format(drop.amount, 
+                                                                                drop.item)))
                 inventory.add_to_inventory(drop.item, drop.amount)
-                drops.remove(drop)
+                world.drops.remove(drop)
 
         if self.sound_cooldown > 0:
             self.sound_cooldown -= 1
@@ -119,12 +120,12 @@ class Player():
         # movement function
         if self.falling:
             self.rect.y += 1
-            if self.rect.collidelist(slabs) == -1:
+            if self.rect.collidelist(world.slabs) == -1:
                 self.falling = False
             else:
                 self.rect.y += 3
         else:
-            self.rect, self.collisions = move(self.rect, self.dx, self.dy, tiles, slabs)
+            self.rect, self.collisions = move(self.rect, self.dx, self.dy, world)
 
 
     def draw(self, display, scrollx, scrolly):
@@ -192,8 +193,8 @@ class DroppedItem():
     
     def __init__(self, x, y, dx, dy, item, amount=1):
         self.image = ITEMS[item]["image"]
-        if item in ["dirt", "stone", "plank", "plank wall", "rock"]:
-            self.image = pygame.transform.scale(self.image, (8, 8))
+        #if item in ["dirt", "stone", "plank", "plank wall", "rock"]:
+        self.image = pygame.transform.scale(self.image, (8, 8))
         self.rect = pygame.Rect(x, y, self.image.get_width(), self.image.get_height())
         self.item = item
         self.dx = dx
@@ -201,11 +202,11 @@ class DroppedItem():
         self.gravity = 0.4
         self.amount = amount
 
-    def update(self, tiles, scrollx, scrolly):
+    def update(self, world):
         # only update movement if drop is in the screen
         # prevents them from falling off the map
-        if self.rect.x - scrollx > 0 and self.rect.x - scrollx < DISPLAY_WIDTH and self.rect.y - scrolly > 0 and self.rect.y - scrolly < DISPLAY_HEIGHT:
-            self.rect, collide = move(self.rect, self.dx, self.dy, tiles)
+        if self.rect.x - world.scrollx > 0 and self.rect.x - world.scrollx < DISPLAY_WIDTH and self.rect.y - world.scrolly > 0 and self.rect.y - world.scrolly < DISPLAY_HEIGHT:
+            self.rect, collide = move(self.rect, self.dx, self.dy, world)
             self.dy += self.gravity
             if collide["down"]:
                 self.dy = 0
@@ -225,15 +226,15 @@ class FadingText():
         x, y, text, color=BLACK
     """
     
-    def __init__(self, x, y, text, color=BLACK):
+    def __init__(self, x, y, text, current_biome=1, color=BLACK):
         global fadey
         self.x = x
         self.y = y - fadey
         self.size = 16
         self.text = text
         self.color = color
-        #if current_biome == 3 or is_night == True and color == BLACK:
-        #    self.color = WHITE
+        if current_biome == 3 and color == BLACK:
+            self.color = WHITE
         fadey += 10
 
     def update(self, popups):
@@ -246,3 +247,5 @@ class FadingText():
 
     def draw(self, display, scrollx, scrolly):
         print_text(self.text, int(self.x - scrollx), int(round(self.y) - scrolly), display, 1, int(round(self.size)), self.color)
+
+
