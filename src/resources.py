@@ -103,10 +103,6 @@ for i in range(0, 9):
     explosion_image.set_colorkey((229, 229, 229))
     explosion_images.append(explosion_image)
 
-
-
-
-
 # items and tiles
 ITEMS = {
     "": {

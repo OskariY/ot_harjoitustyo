@@ -11,7 +11,7 @@ import sys
 import random
 
 # import constants/settings
-from settings import WINDOW_WIDTH, WINDOW_HEIGHT, DISPLAY_WIDTH, DISPLAY_HEIGHT, WHITE, FPS, CHUNK_SIZE, TILE_SIZE, GRAY, BROWN, GRASSGREEN, MUSIC, CENTER
+from settings import WINDOW_WIDTH, WINDOW_HEIGHT, DISPLAY_WIDTH, DISPLAY_HEIGHT, BLACK, WHITE, FPS, CHUNK_SIZE, TILE_SIZE, GRAY, BROWN, GRASSGREEN, MUSIC, CENTER, FULLSCREEN
 
 # handle arguments
 for arg in sys.argv:
@@ -24,14 +24,18 @@ for arg in sys.argv:
 
 # intialize pygame and set up display
 pygame.init()
-screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+if FULLSCREEN:
+    screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+    WINDOW_WIDTH, WINDOW_HEIGHT = screen.get_size()
+else:
+    screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 display = pygame.Surface((DISPLAY_WIDTH, DISPLAY_HEIGHT))
 pygame.display.set_caption("Northlands: unspaghettified")
 # import functions, classes and resources (images, sound etc.) needed
-from resources import ITEMS, tree_image, jump_sound, break_sound
-from entities import Player, Particle, FadingText
+from resources import ITEMS, CRAFTING_REQUIREMENTS, tree_image, jump_sound, break_sound, hurt_sound
+from entities import Player, Particle, FadingText, WalkingMob
 from inventory import Inventory
-from functions import print_text
+from functions import print_text, chunk_debug
 from world import World
 
 def main():
@@ -43,16 +47,18 @@ def main():
 
     # player object
     player = Player(world.spawn_x, world.spawn_y)
-
     # inventory related variables
     inventory = Inventory()
     inv_open = False
-    
+
     # add some basic items to the inventory
     inventory.add_to_inventory("axe", 1)
     inventory.add_to_inventory("pickaxe", 1)
     inventory.add_to_inventory("shovel", 1)
     inventory.add_to_inventory("plank", 100)
+    inventory.add_to_inventory("meat", 10)
+    
+    inventory.equip_item(0)
 
     # tile breaking related variables
     selected_tile = None
@@ -61,12 +67,16 @@ def main():
     # if MUSIC setting is True, play music indefinately
     if MUSIC:
         pygame.mixer.music.play(-1)
-
-    help_dismissed = 250 
+    
+    chunk_debug_enabled = False
+    help_dismissed = False 
     help_text = ["WASD: move and jump", 
                  "Mouse1: break block with tools",  
                  "Mouse2: place block", 
-                 "1-6: select hotbar items"]
+                 "1-6: select hotbar items",
+                 "TAB: open/close inventory",
+                 "",
+                 "press h to open/close help"]
 
     # game loop
     while True:
@@ -81,7 +91,7 @@ def main():
         # update world variables (e.g. scroll)
         world.update(mousepos, player)  
         # generate world
-        world.generate_world(display)
+        world.generate_world(display, player)
 
         # event loop
         for event in pygame.event.get():
@@ -89,7 +99,11 @@ def main():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            if event.type == pygame.KEYDOWN:                
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_p:
+                    mob = WalkingMob(player.rect.x + 50, player.rect.y - 100)
+                    world.mobs.append(mob)
+                    world.entities.append(mob)
             # movement
                 # move right
                 if event.key == pygame.K_d:
@@ -124,7 +138,19 @@ def main():
                     inventory.equip_item(3)
                 if event.key == pygame.K_5:
                     inventory.equip_item(4)
-                
+                if event.key == pygame.K_q:
+                    pygame.quit()
+                    sys.exit()
+                if event.key == pygame.K_h:
+                    if help_dismissed:
+                        help_dismissed = False
+                    else:
+                        help_dismissed = True
+                if event.key == pygame.K_o:
+                    if chunk_debug_enabled:
+                        chunk_debug_enabled = False
+                    else:
+                        chunk_debug_enabled = True
             if event.type == pygame.KEYUP:
                     if event.key == pygame.K_d:
                         player.moving_right = False
@@ -144,6 +170,51 @@ def main():
                                 if inventory.inventory[i][1] != "":
                                     inventory.inv_select1 = i
                                     break
+                        
+                        # crafting selections
+                        for i, selectbutton in enumerate(inventory.crafting_selection_rects):
+                            if selectbutton.collidepoint((mousepos[0] - inventory.invx, 
+                                                          mousepos[1] - inventory.invy)):
+                                inventory.crafting_item_selected = i
+                                inventory.crafting_item_rect = selectbutton
+                                break
+
+                        # crafting pagination
+                        if inventory.crafting_back_button.collidepoint((mousepos[0] - inventory.invx, 
+                                                                        mousepos[1] - inventory.invy)):
+                            if inventory.crafting_index_1 > 0:
+                                if inventory.crafting_index_1 - 6 > 0:
+                                    inventory.crafting_index_1 -= 6
+                                    inventory.crafting_index_2 -= 6
+                                else:
+                                    inventory.crafting_index_1 = 0
+                                    inventory.crafting_index_2 = 6
+                        if inventory.crafting_next_button.collidepoint((mousepos[0] - inventory.invx, 
+                                                                        mousepos[1] - inventory.invy)):
+                            craftables = len(list(CRAFTING_REQUIREMENTS.keys()))
+                            if inventory.crafting_index_2 < craftables:
+                                if inventory.crafting_index_2 + 6 < craftables:
+                                    inventory.crafting_index_1 += 6
+                                    inventory.crafting_index_2 += 6
+                                else:
+                                    inventory.crafting_index_2 = craftables
+                                    inventory.crafting_index_1 = craftables - 6
+
+                        # crafting button
+                        if inventory.crafting_item_selected != None:
+                            if inventory.crafting_item_selected < len(inventory.visible_crafting_items):
+                                if inventory.crafting_button.collidepoint((mousepos[0] - inventory.invx, 
+                                                                           mousepos[1] - inventory.invy)):
+                                    have_requirements = True
+                                    for requirement in CRAFTING_REQUIREMENTS[inventory.visible_crafting_items[inventory.crafting_item_selected]]:
+                                        if not inventory.in_inventory(requirement[0], requirement[1]):
+                                            have_requirements = False
+                                    if have_requirements:
+                                        inventory.add_to_inventory(inventory.visible_crafting_items[inventory.crafting_item_selected], 1)
+                                        for requirement in CRAFTING_REQUIREMENTS[inventory.visible_crafting_items[inventory.crafting_item_selected]]:
+                                            inventory.remove_item(requirement[0], requirement[1])
+
+
                 # regular mouse countrols
                 else:
                     if event.button == 1:
@@ -158,11 +229,12 @@ def main():
                                 world.popups.append(FadingText(player.rect.centerx, 
                                                     player.rect.top, 
                                                     "+{} HP".format(str(ITEMS[inventory.equipped]["heal"])), 
-                                                    GRASSGREEN,
-                                                    world.current_biome))
+                                                    world.current_biome,
+                                                    GRASSGREEN
+                                                    ))
                             # tool logic
                             if ITEMS[inventory.equipped]["tool"] and inventory.in_inventory(inventory.equipped):
-                                #player.hit(inventory.equipped, mobs, worms, mousex, mousey)
+                                player.hit(inventory.equipped, world, mousex, mousey)
                                 breaking_tile = world.get_tile(truemousepos)
                                 if selected_tile != breaking_tile:
                                     selected_tile = breaking_tile
@@ -249,6 +321,19 @@ def main():
         for particle in world.particles:
             particle.update(display, world.particles, world.scrollx, world.scrolly)
 
+        for mob in world.mobs:
+            mob.update(player, world)
+            mob.draw(display, world)
+            # check for collisions with the player
+            if mob.rect.colliderect(player.rect):
+                player.health -= 1
+                if player.sound_cooldown <= 0:
+                    hurt_sound.play()
+                    player.sound_cooldown = 10 
+        
+        for worm in world.worms:
+            worm.update(player, world)
+            worm.draw(display, world.scrollx, world.scrolly)
 
         # draw inventory
         inventory.draw(inv_open, display, mousepos)
@@ -266,8 +351,7 @@ def main():
         else:
             biomename = world.current_biome
         
-        if help_dismissed > 0:
-            help_dismissed -= 1
+        if not help_dismissed:
             help_x = CENTER[0] - 96 
             help_y = CENTER[1] - 64
             print_text("Controls:", CENTER[0], help_y - 20, display, 1, 18)
@@ -275,8 +359,15 @@ def main():
                 print_text(t, help_x, help_y, display, 0, 18)
                 help_y += 18
         else:
-            print_text(f"biome: {biomename}", 0, 0, display, 0, 16)
-            print_text(f"FPS: {int(clock.get_fps())}", 400, 0, display, 2, 16)
+            if world.current_biome == 3:
+                fps_color = WHITE
+            else:
+                fps_color = BLACK
+            print_text(f"biome: {biomename}", 0, 0, display, 0, 10, fps_color)
+            print_text(f"FPS: {int(clock.get_fps())}", DISPLAY_WIDTH, 0, display, 2, 10, fps_color)
+        
+        if chunk_debug_enabled:
+            chunk_debug(truemousepos, display, world)
 
         # draw display surface onto screen, update it and clock the fps
         screen.blit(pygame.transform.scale(display, (WINDOW_WIDTH, WINDOW_HEIGHT)), (0, 0))
