@@ -1,7 +1,7 @@
 import noise
 import random
 import pygame
-from settings import BLACK, BLUE, BROWN, GRAY, BROWN, GRASSGREEN, FONT, TILE_SIZE, CHUNK_SIZE
+from settings import WHITE, BLACK, BLUE, BROWN, GRAY, BROWN, GRASSGREEN, FONT, TILE_SIZE, CHUNK_SIZE, RED
 from resources import ITEMS, break_sound, build_sound
 
 def print_text(text, x, y, display, allignment=0, size=32, color=BLACK):
@@ -19,14 +19,14 @@ def print_text(text, x, y, display, allignment=0, size=32, color=BLACK):
         x = x - surf.get_width()
     display.blit(surf, (x, y))
 
-def move(rect, dx, dy, world):
-    """Moves a pygame rectangle
+def move(entity, world, entity_collisions=False):
+    """
+    Moves an entity while checking for collisions.
 
     Args:
-        rect, tiles, dx, dy, slabs=[], entities=[]
-    Returns:
-        rect, collisions
-
+        entity: Object with a pygame rect, collisions and dx/dy attributes
+        world: World object
+        entity_collisions: Should collisions be checked with entities
     """
 
     collisions = {
@@ -36,33 +36,72 @@ def move(rect, dx, dy, world):
             "down": False,
             }
     # move horizontally and check for collisions
-    rect.x += dx
+    entity.rect.x += entity.dx
     for tile in world.tiles:
-        if rect.colliderect(tile):
-            if not tile in world.slabs:
-                if dx > 0:
-                    rect.right = tile.left
+        if entity.rect.colliderect(tile):
+            if not tile in world.slabs: 
+                if entity.dx > 0:
+                    entity.rect.right = tile.left
                     collisions["right"] = True
-                if dx < 0:
-                    rect.left = tile.right
+                if entity.dx < 0:
+                    entity.rect.left = tile.right
                     collisions["left"] = True
-    for entity in world.entities:
-        if rect.colliderect(entity):
-            if dx > 0:
-                rect.x -= dx
-            if dx < 0:
-                rect.y += dx
+    if entity_collisions:
+        for w_entity in world.entities:
+            if not w_entity.rect == entity.rect:
+                if w_entity.rect.colliderect(entity.rect):
+                    #entity.rect.x -= entity.dx
+                    if entity.rect.centerx < w_entity.rect.centerx:
+                        entity.dx -= 2
+                        w_entity.dx += 2
+                    else:
+                        entity.dx += 2
+                        w_entity.dx -= 2
     # move vertically and check for collisions
-    rect.y += dy
+    entity.rect.y += entity.dy
     for tile in world.tiles:
-        if rect.colliderect(tile):
-            if dy > 0:
-                rect.bottom = tile.top
+        if entity.rect.colliderect(tile):
+            if entity.dy > 0:
+                entity.rect.bottom = tile.top
                 collisions["down"] = True
-            if dy < 0:
+            if entity.dy < 0:
                 if not tile in world.slabs:
-                    rect.top = tile.bottom
+                    entity.rect.top = tile.bottom
                     collisions["up"] = True
 
-    return rect, collisions
+    entity.collisions = collisions
+    
+def chunk_debug(pos, display, world):
+    mousex = pos[0]
+    mousey = pos[1]
+    for chunk in world.game_map.keys():
+        chunkx, chunky = chunk.split(";")
+        chunkx = int(chunkx) * TILE_SIZE * CHUNK_SIZE
+        chunky = int(chunky) * TILE_SIZE * CHUNK_SIZE
+        chunkrect = pygame.Rect(chunkx, chunky, 8*TILE_SIZE, 8*TILE_SIZE)
+        if chunkrect.collidepoint(mousex, mousey):
+            chunkrect.x -= world.scrollx
+            chunkrect.y -= world.scrolly
+            if world.game_map[chunk][1] == 1:
+                biome = "Forest"
+            elif world.game_map[chunk][1] == 2:
+                biome = "Tundra"
+            elif world.game_map[chunk][1] == 3:
+                biome = "Underworld"
+            else:
+                biome = world.game_map[chunk][1]
+            chunkname = chunk.replace(";", ", ")
+            color = BLACK
+            if world.current_biome == 3:
+                color = WHITE
+            print_text("biome: {}".format(biome), chunkrect.x, chunkrect.y, display, 0, 16, color)
+            print_text("chunk: {}".format(chunkname), chunkrect.x, chunkrect.y + 16, display, 0, 16, color)
+            for tile in world.game_map[chunk][0]:
+                drawrect = pygame.Rect(tile[0][0]*TILE_SIZE-world.scrollx, tile[0][1]*TILE_SIZE-world.scrolly, TILE_SIZE, TILE_SIZE)
+                pygame.draw.rect(display, BLUE, drawrect, 1)
+        else:
+            chunkrect.x -= world.scrollx
+            chunkrect.y -= world.scrolly
+            pygame.draw.rect(display, RED, chunkrect, 1)
+
 

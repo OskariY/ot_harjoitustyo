@@ -19,6 +19,8 @@ Peli on kirjoitettu Pythonilla ja toteutettu käyttäen pygame-grafiikkakirjasto
 
 [Tuntikirjanpito](https://github.com/yoskari/ot_harjoitustyo/blob/main/dokumentaatio/tuntikirjanpito.md)
 
+[Arkkitehtuuri](https://github.com/yoskari/ot_harjoitustyo/blob/main/dokumentaatio/arkkitehtuuri.md)
+
 ## Asennus
 1. Asenna riippuvuudet komennolla:
 

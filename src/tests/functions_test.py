@@ -6,12 +6,19 @@ screen = pygame.display.set_mode((400, 300))
 
 from functions import move
 from world import World
-
 class TestMove(unittest.TestCase):
+    class TestObject():
+        def __init__(self):
+            self.rect = pygame.Rect(16, 16, 16, 16)
+            self.dx = 0
+            self.dy = 0
+            self.collisions = {}
+
     def setUp(self):
-        self.rect = pygame.Rect(16, 16, 16, 16)
+        self.obj = self.TestObject()
         self.world = World()
-        self.world.tiles = [] # usually created in the world generation process
+        # usually created in the world generation process
+        self.world.tiles = []
         self.world.slabs = []
         x = -64
         for i in range(10):
@@ -19,15 +26,15 @@ class TestMove(unittest.TestCase):
             x += 16
 
     def test_move_no_dspeed_no_collisions(self):
-        dx = 0
-        dy = 0
         # set the test rect slightly above the tiles
-        self.rect.bottom = 14
-        new_rect, collisions = move(self.rect, dx, dy, self.world)
+        self.obj.rect.bottom = 14
+        old_rect = self.obj.rect
+        move(self.obj, self.world)
+        new_rect = self.obj.rect
         # rect doesn't move
-        self.assertEqual(new_rect, self.rect)
+        self.assertEqual(new_rect, old_rect)
         # no collisions are detected
-        self.assertEqual(collisions, {
+        self.assertEqual(self.obj.collisions, {
             "right": False,
             "left": False,
             "up": False,
@@ -35,13 +42,14 @@ class TestMove(unittest.TestCase):
             })
 
     def test_move_y_collisions(self):
-        dx = 0
-        dy = 3
+        self.obj.dy = 3
         
-        self.rect.bottom = 14
-        new_rect, collisions = move(self.rect, dx, dy, self.world)
-        self.assertEqual(new_rect, self.rect)
-        self.assertEqual(collisions, {
+        self.obj.rect.bottom = 14
+        move(self.obj, self.world)
+        # rect bottom should be stopped at 16 instead of going up to 17
+        self.assertEqual(self.obj.rect.bottom, 16)
+        # "down" should be True
+        self.assertEqual(self.obj.collisions, {
             "right": False,
             "left": False,
             "up": False,
@@ -49,14 +57,13 @@ class TestMove(unittest.TestCase):
             })
 
     def test_move_x_collisions(self):
-        dx = 2
-        dy = 0
+        self.obj.dx = 5 
         
-        self.rect.y = 16
-        self.rect.right = -65
-        new_rect, collisions = move(self.rect, dx, dy, self.world)
-        self.assertEqual(new_rect, self.rect)
-        self.assertEqual(collisions, {
+        self.obj.rect.y = 16
+        self.obj.rect.right = -65
+        move(self.obj, self.world)
+        self.assertEqual(self.obj.rect.right, -64)
+        self.assertEqual(self.obj.collisions, {
             "right": True,
             "left": False,
             "up": False,

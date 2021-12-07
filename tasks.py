@@ -8,6 +8,10 @@ def test(ctx):
     ctx.run("pytest src")
 
 @task
+def pylint(ctx):
+    ctx.run("pylint src")
+
+@task
 def coverage(ctx):
     ctx.run("coverage run --branch -m pytest src")
 

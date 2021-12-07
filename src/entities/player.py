@@ -1,8 +1,9 @@
-import random
 import pygame
-from resources import ITEMS, player_images, death_sound
-from settings import TILE_SIZE, BLACK, RED, GREEN, DISPLAY_WIDTH, DISPLAY_HEIGHT
-from functions import move, print_text
+import math
+from settings import TILE_SIZE, GREEN, RED
+from resources import player_images, ITEMS, hurt_sound, death_sound
+from entities.fadingtext import FadingText
+from functions import move
 
 class Player():
     def __init__(self, x, y):
@@ -42,6 +43,51 @@ class Player():
 
         self.falling = False
 
+    def chop(self, image):
+        self.chopping_animation = 10
+        self.chopping_rotation = 10
+        self.chopping_image = image
+
+    def hit(self, weapon, world, mousex, mousey):
+        self.chop(ITEMS[weapon]["image"])
+        if abs(self.rect.centerx - mousex - world.scrollx) < 40 and abs(self.rect.centery - mousey - world.scrolly) < 40:
+            self.hitrect.centerx = mousex+world.scrollx
+            self.hitrect.centery = mousey+world.scrolly
+        else:
+            distance_x = mousex - self.rect.centerx + world.scrollx
+            distance_y = mousey - self.rect.centery + world.scrolly
+
+            angle = math.atan2(distance_y, distance_x)
+            self.hitrect.centerx = self.rect.centerx
+            self.hitrect.centery = self.rect.centery
+            self.hitrect.centerx += 40 * math.cos(angle)
+            self.hitrect.centery += 40 * math.sin(angle)
+
+        for mob in world.mobs:
+            if mob.rect.colliderect(self.hitrect):
+                hurt_sound.play()
+                mob.health -= 5
+                if mousex+world.scrollx > self.rect.centerx:
+                    mob.dx += 5
+                else:
+                    mob.dx -= 5
+                mob.dy -= 3
+        for worm in world.worms:
+            hit = False
+            if worm.head_rect.colliderect(self.hitrect):
+                hurt_sound.play()
+
+                hit = True
+            for wormbody in worm.body_rects:
+                if wormbody.colliderect(self.hitrect):
+                    hurt_sound.play()
+                    hit = True
+            if hit:
+                worm.health -= 5
+        # self.hitrect.x -= scrollx
+        # self.hitrect.y -= scrolly
+        # pygame.draw.rect(display, RED, self.hitrect)
+
     def update(self, inventory, world):
         """
         updates the player object
@@ -54,8 +100,8 @@ class Player():
         for drop in list(world.drops):
             if self.rect.colliderect(drop.rect):
                 world.popups.append(FadingText(self.rect.centerx, 
-                                               self.rect.top, "+{} x {}".format(drop.amount, 
-                                                                                drop.item)))
+                                               self.rect.top, "+{} x {}".format(drop.amount, drop.item),
+                                               world.current_biome))
                 inventory.add_to_inventory(drop.item, drop.amount)
                 world.drops.remove(drop)
 
@@ -125,7 +171,7 @@ class Player():
             else:
                 self.rect.y += 3
         else:
-            self.rect, self.collisions = move(self.rect, self.dx, self.dy, world)
+            move(self, world, True)
 
 
     def draw(self, display, scrollx, scrolly):
@@ -159,93 +205,4 @@ class Player():
                 chopx = self.rect.x-scrollx + 2
             chopy = self.rect.y-scrolly
             display.blit(pygame.transform.rotate(pygame.transform.flip(self.chopping_image, self.invert, 0), rot), (chopx, chopy))
-
-class Particle():
-    def __init__(self, x, y, color):
-        self.x = x
-        self.y = y
-        self.color = color
-        self.dx = random.randint(0, 10) / 10 - 1
-        self.dy = random.randint(0, 10) / 10 - 1
-        # both timer and radius for the particle
-        self.timer = random.randint(1, 7)
-
-    def update(self, display, particles, scrollx, scrolly):
-        """
-        Updates and draws the particle object
-        Args:
-            display, particles, scrollx, scrolly
-        """
-        self.x += self.dx
-        self.y += self.dy
-        self.y += 2
-        self.timer -= 0.2
-        pygame.draw.circle(display, self.color, (int(self.x - scrollx), int(self.y - scrolly)), int(self.timer))
-        if self.timer <= 0:
-            particles.remove(self)
-
-class DroppedItem():
-    """
-    Object for drops that can be picked up by the player
-    Args:
-        x, y, dx, dy, item, amount=1
-    """
-    
-    def __init__(self, x, y, dx, dy, item, amount=1):
-        self.image = ITEMS[item]["image"]
-        #if item in ["dirt", "stone", "plank", "plank wall", "rock"]:
-        self.image = pygame.transform.scale(self.image, (8, 8))
-        self.rect = pygame.Rect(x, y, self.image.get_width(), self.image.get_height())
-        self.item = item
-        self.dx = dx
-        self.dy = dy
-        self.gravity = 0.4
-        self.amount = amount
-
-    def update(self, world):
-        # only update movement if drop is in the screen
-        # prevents them from falling off the map
-        if self.rect.x - world.scrollx > 0 and self.rect.x - world.scrollx < DISPLAY_WIDTH and self.rect.y - world.scrolly > 0 and self.rect.y - world.scrolly < DISPLAY_HEIGHT:
-            self.rect, collide = move(self.rect, self.dx, self.dy, world)
-            self.dy += self.gravity
-            if collide["down"]:
-                self.dy = 0
-                self.dx = 0
-
-            if collide["left"] or collide["right"]:
-                self.dx = 0
-
-    def draw(self, display, scrollx, scrolly):
-        display.blit(self.image, (self.rect.x - scrollx, self.rect.y - scrolly))
-
-fadey = 0
-class FadingText():
-    """
-    A fading text popup that appears above the player, rises and disappears
-    Args:
-        x, y, text, color=BLACK
-    """
-    
-    def __init__(self, x, y, text, current_biome=1, color=BLACK):
-        global fadey
-        self.x = x
-        self.y = y - fadey
-        self.size = 16
-        self.text = text
-        self.color = color
-        if current_biome == 3 and color == BLACK:
-            self.color = WHITE
-        fadey += 10
-
-    def update(self, popups):
-        global fadey
-        self.size -= 0.3
-        self.y -= 2
-        if self.size < 8:
-            popups.remove(self)
-            fadey -= 10
-
-    def draw(self, display, scrollx, scrolly):
-        print_text(self.text, int(self.x - scrollx), int(round(self.y) - scrolly), display, 1, int(round(self.size)), self.color)
-
 

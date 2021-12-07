@@ -1,9 +1,16 @@
 import noise
 import random
 import pygame
-from settings import BLACK, BLUE, BROWN, GRAY, BROWN, GRASSGREEN, FONT, TILE_SIZE, CHUNK_SIZE, DISPLAY_WIDTH, DISPLAY_HEIGHT, DISPLAY_WIDTH, DISPLAY_HEIGHT, DISPLAY_WIDTH, DISPLAY_HEIGHT, DISPLAY_WIDTH, DISPLAY_HEIGHT
+from settings import BLACK, WHITE, BLUE, BROWN, GRAY, BROWN, GRASSGREEN, FONT, TILE_SIZE, \
+                     CHUNK_SIZE, DISPLAY_WIDTH, DISPLAY_HEIGHT, DISPLAY_WIDTH, DISPLAY_HEIGHT, \
+                     DISPLAY_WIDTH, DISPLAY_HEIGHT, DISPLAY_WIDTH, DISPLAY_HEIGHT, MOB_SPAWNS, \
+                     MOB_LIMIT
 from resources import ITEMS, break_sound, build_sound, background_image, tree_image
-from entities import DroppedItem, Particle
+from entities.drop import DroppedItem
+from entities.particle import Particle
+from entities.walkingmob import WalkingMob
+from entities.flyingmob import FlyingMob
+from entities.caveworm import Worm
 
 class World():
     """
@@ -47,14 +54,13 @@ class World():
 
         self.current_biome = self.get_biome((player.rect.x, player.rect.y))
 
-    def generate_world(self, display):
+    def generate_world(self, display, player):
         # clear lists affected by the world generation loop
         
         self.tiles = []
         self.buildables = []
         self.glows = []
         self.slabs = []
-        self.entities = []
 
         # draw background image
         if self.current_biome == 3:
@@ -63,7 +69,7 @@ class World():
             display.blit(background_image, (0, 0))
 
         # world generation
-        for x in range(6):
+        for x in range(7):
             for y in range(5):
                 # define the target chunk and check if it exists in the game map
                 # if so get it else generate it
@@ -72,6 +78,20 @@ class World():
                 target_chunk = str(target_x) + ';' + str(target_y)
                 if target_chunk not in self.game_map:
                     self.game_map[target_chunk] = self.generate_chunk(target_x, target_y)
+                
+                if MOB_SPAWNS:
+                    # caveworm spawns
+                    if self.game_map[target_chunk][1] == 3 and random.randint(1, 30000) == 1 and self.current_biome == 3:
+                        if abs(player.rect.x - target_x*TILE_SIZE*CHUNK_SIZE) > 150 and abs(player.rect.y - target_y*TILE_SIZE*CHUNK_SIZE) > 150:
+                            self.worms.append(Worm(target_x*TILE_SIZE*CHUNK_SIZE,target_y*TILE_SIZE*CHUNK_SIZE))
+
+                    # bird spawns
+                    if len(self.game_map[target_chunk][0]) == 0 and self.game_map[target_chunk][1] == 2:
+                        if random.randint(1, 10000) == 1 and len(self.mobs) < MOB_LIMIT:
+                            bird = FlyingMob(target_x*TILE_SIZE*CHUNK_SIZE, target_y*TILE_SIZE*CHUNK_SIZE)
+                            self.mobs.append(bird)
+                            self.entities.append(bird)
+
                 # go through all tiles in the target chunk
                 for tile in self.game_map[target_chunk][0]:
 #                    if tile[1] == "torch":
@@ -94,21 +114,22 @@ class World():
                                      (tile[0][0]*TILE_SIZE-self.scrollx,
                                       tile[0][1]*TILE_SIZE-self.scrolly))
 
-                    # mob spawns, when I get around to adding the mob classes
-                    # BROKEN CODE, FIX!!
-#                    if MOB_SPAWNS:
-#                        if tile[1] == "snowy grass":
-#                            if random.randint(1, 30000) == 1:
-#                                if tile[0][0]*TILE_SIZE < player.rect.x - 100 or tile[0][0]*TILE_SIZE > player.rect.x + 100:
-#                                    print("bear spawned, mobs: {}".format(len(mobs)))
-#                                    mobs.append(WalkingMob(tile[0][0]*TILE_SIZE, tile[0][1]*TILE_SIZE-48, 1))
-#                        if is_night == True:
-#                            if tile[1] in ["snowy grass", "grass"]:
-#                                if random.randint(1, 10000) == 1:
-#                                    if tile[0][0]*TILE_SIZE < player.rect.x - 100 or tile[0][0]*TILE_SIZE > player.rect.x + 100:
-#                                        print("skeleton spawned, mobs: {}".format(len(mobs)))
-#                                        mobs.append(WalkingMob(tile[0][0]*TILE_SIZE, tile[0][1]*TILE_SIZE-48, 2))
-#
+                    # mob spawns
+                    if MOB_SPAWNS:
+                        if tile[1] == "snowy grass":
+                            if random.randint(1, 30000) == 1 and len(self.mobs) < MOB_LIMIT:
+                                if tile[0][0]*TILE_SIZE < player.rect.x - 100 or tile[0][0]*TILE_SIZE > player.rect.x + 100:
+                                    bear = WalkingMob(tile[0][0]*TILE_SIZE, tile[0][1]*TILE_SIZE-48)
+                                    self.mobs.append(bear)
+                                    self.entities.append(bear)
+                        
+                        #if is_night == True:
+                        #    if tile[1] in ["snowy grass", "grass"]:
+                        #        if random.randint(1, 10000) == 1:
+                        #            if tile[0][0]*TILE_SIZE < player.rect.x - 100 or tile[0][0]*TILE_SIZE > player.rect.x + 100:
+                        #                print("skeleton spawned, mobs: {}".format(len(mobs)))
+                        #                mobs.append(WalkingMob(tile[0][0]*TILE_SIZE, tile[0][1]*TILE_SIZE-48, 2))
+
                     # physics
                     if tile[1] in ["stone","dirt","grass","snowy grass","plank","rock","coal block","slab"]:
                         self.tiles.append(pygame.Rect(tile[0][0]*TILE_SIZE,
@@ -213,7 +234,6 @@ class World():
         testrect = pygame.Rect(0, 0, TILE_SIZE*2, TILE_SIZE*2)
         testrect.centerx = pos[0]
         testrect.centery = pos[1]
-        color = BLUE
         for tile in self.buildables:
             if tile.colliderect(testrect):
                 return True
@@ -256,7 +276,7 @@ class World():
                             elif tile[1] in ["stone", "rock"]:
                                 drop_name = "rock"
                             elif tile[1] in ["tree1", "tree2", "tree3", "tree4"]:
-                                drop_name = "plank",
+                                drop_name = "plank"
                                 drop_amount = random.randint(5, 15)
                                 if tile[1] != "tree4" and random.randint(0, 1) == 1:
                                     self.drops.append(DroppedItem(tilerect.x + 5, tilerect.y + 5,
@@ -264,11 +284,12 @@ class World():
                             elif tile[1] == "coal block":
                                 drop_name = "coal"
 
-                            self.drops.append(DroppedItem(tilerect.x + 5,
-                                                          tilerect.y + 5,
+                            self.drops.append(DroppedItem(tilerect.x + 2,
+                                                          tilerect.y + 2,
                                                           0,
                                                           0,
-                                                          drop_name))
+                                                          drop_name,
+                                                          drop_amount))
                        
                             # spawn particles with the color defaulting to brown
                             particle_color = BROWN
@@ -360,7 +381,7 @@ class World():
                                 if item_cost:
                                     inventory.remove_item(inventory.equipped, 1)
                         else:
-                            if ITEMS[equipped]["furniture"] == True:
+                            if ITEMS[inventory.equipped]["furniture"] == True:
                                 existing_tiles = self.tile_exists(chunk, target_x // TILE_SIZE, 
                                                                   target_y // TILE_SIZE)
                                 if len(existing_tiles) == 1:
@@ -403,8 +424,8 @@ class World():
                 if tile != None:
                     color = BLACK
                     drawrect = pygame.Rect(tile[0][0]*TILE_SIZE-self.scrollx, tile[0][1]*TILE_SIZE-self.scrolly, TILE_SIZE, TILE_SIZE)
-                    #if current_biome == 3 or is_night and color == BLACK:
-                    #    color = WHITE
+                    if self.current_biome == 3:
+                        color = WHITE
                     pygame.draw.rect(display, color, drawrect, 1)
             elif ITEMS[equipped]["build"]:
                 if self.get_next_tiles(pos):
