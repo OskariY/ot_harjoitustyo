@@ -1,8 +1,5 @@
-import noise
-import random
 import pygame
-from settings import WHITE, BLACK, BLUE, BROWN, GRAY, BROWN, GRASSGREEN, FONT, TILE_SIZE, CHUNK_SIZE, RED
-from resources import ITEMS, break_sound, build_sound
+from settings import WHITE, BLACK, BLUE, FONT, TILE_SIZE, CHUNK_SIZE, RED
 
 def print_text(text, x, y, display, allignment=0, size=32, color=BLACK):
     """

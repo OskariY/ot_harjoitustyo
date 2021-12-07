@@ -6,12 +6,13 @@ spaghetti code.
 
 """
 
-import pygame
 import sys
-import random
+import pygame
 
 # import constants/settings
-from settings import WINDOW_WIDTH, WINDOW_HEIGHT, DISPLAY_WIDTH, DISPLAY_HEIGHT, BLACK, WHITE, FPS, CHUNK_SIZE, TILE_SIZE, GRAY, BROWN, GRASSGREEN, MUSIC, CENTER, FULLSCREEN
+from settings import WINDOW_WIDTH, WINDOW_HEIGHT, DISPLAY_WIDTH, DISPLAY_HEIGHT, \
+                     BLACK, WHITE, FPS, TILE_SIZE, GRAY, BROWN, GRASSGREEN, MUSIC, \
+                     CENTER, FULLSCREEN
 
 # handle arguments
 for arg in sys.argv:
@@ -32,7 +33,7 @@ else:
 display = pygame.Surface((DISPLAY_WIDTH, DISPLAY_HEIGHT))
 pygame.display.set_caption("Northlands: unspaghettified")
 # import functions, classes and resources (images, sound etc.) needed
-from resources import ITEMS, CRAFTING_REQUIREMENTS, tree_image, jump_sound, break_sound, hurt_sound
+from resources import ITEMS, CRAFTING_REQUIREMENTS, jump_sound, break_sound, hurt_sound
 from entities.player import Player
 from entities.particle import Particle
 from entities.fadingtext import FadingText
@@ -91,7 +92,7 @@ def main():
         truemousepos = (mousex + world.scrollx, mousey + world.scrolly)
 
         # update world variables (e.g. scroll)
-        world.update(mousepos, player)  
+        world.update(player)  
         # generate world
         world.generate_world(display, player)
 

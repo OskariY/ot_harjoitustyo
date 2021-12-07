@@ -1,9 +1,9 @@
 import noise
 import random
 import pygame
-from settings import BLACK, WHITE, BLUE, BROWN, GRAY, BROWN, GRASSGREEN, FONT, TILE_SIZE, \
-                     CHUNK_SIZE, DISPLAY_WIDTH, DISPLAY_HEIGHT, DISPLAY_WIDTH, DISPLAY_HEIGHT, \
-                     DISPLAY_WIDTH, DISPLAY_HEIGHT, DISPLAY_WIDTH, DISPLAY_HEIGHT, MOB_SPAWNS, \
+from settings import BLACK, WHITE, GRAY, BROWN, GRASSGREEN, TILE_SIZE, \
+                     CHUNK_SIZE, DISPLAY_WIDTH, DISPLAY_HEIGHT, \
+                     MOB_SPAWNS, \
                      MOB_LIMIT
 from resources import ITEMS, break_sound, build_sound, background_image, tree_image
 from entities.drop import DroppedItem
@@ -47,7 +47,7 @@ class World():
         self.popups = []
         self.drops = []
         
-    def update(self, mousepos, player):
+    def update(self, player):
         # smoothly scroll camera towards the player
         self.scrollx += round((player.rect.centerx-self.scrollx-DISPLAY_WIDTH//2) / 20)
         self.scrolly += round((player.rect.centery-self.scrolly-DISPLAY_HEIGHT//2) / 20)
@@ -203,21 +203,21 @@ class World():
 
                 elif target_y == 7 - height:
                     # plants
-                        if plant_map < 0:
-                            if biome == 1:
-                                tile_type = "plant"
-                        # trees
-                        if plant_map > 0:
-                            if biome == 1:
-                                if plant_map < 3:
-                                    tile_type = "tree1"
-                                elif plant_map < 6:
-                                    tile_type = "tree2"
-                                elif plant_map < 10:
-                                    tile_type = "tree3"
-                            elif biome == 2:
-                                if 5 < plant_map < 10:
-                                    tile_type = "tree4"
+                    if plant_map < 0:
+                        if biome == 1:
+                            tile_type = "plant"
+                    # trees
+                    if plant_map > 0:
+                        if biome == 1:
+                            if plant_map < 3:
+                                tile_type = "tree1"
+                            elif plant_map < 6:
+                                tile_type = "tree2"
+                            elif plant_map < 10:
+                                tile_type = "tree3"
+                        elif biome == 2:
+                            if 5 < plant_map < 10:
+                                tile_type = "tree4"
                 if tile_type != 0:
                     chunk_data[0].append([[target_x,target_y],tile_type])
         return chunk_data

@@ -1,6 +1,6 @@
 import pygame
 from resources import ITEMS, CRAFTING_REQUIREMENTS, select_arrow
-from settings import CENTER, TILE_SIZE, GRAY, WHITE, WHITE, BLACK, BROWN, RED
+from settings import CENTER, TILE_SIZE, GRAY, WHITE, BLACK, BROWN, RED
 from functions import print_text
 
 class Inventory():

@@ -1,5 +1,5 @@
-import pygame
 import random
+import pygame
 from resources import polarbear_images
 from entities.drop import DroppedItem
 from entities.particle import Particle
@@ -23,7 +23,7 @@ class WalkingMob():
 
         self.image_index = 0
         self.animation_counter = 0
-            
+ 
         self.aggroed = False
         self.speed = 1
         self.max_speed = 3
@@ -33,10 +33,10 @@ class WalkingMob():
         self.jumps = 1
         self.gravity = 0.4
         self.max_gravity = 8
-        
+ 
         self.max_health = 50
         self.health = self.max_health
-        
+ 
         self.collisions = {
             "right": False,
             "left": False,
@@ -52,7 +52,7 @@ class WalkingMob():
             # blood particles
             for i in range(40):
                 world.particles.append(Particle(self.rect.centerx, self.rect.centery, RED))
-            world.drops.append(DroppedItem(self.rect.x, self.rect.y, 
+            world.drops.append(DroppedItem(self.rect.x, self.rect.y,
                                            self.dx, self.dy, "meat", random.randint(1, 5)))
 
             world.mobs.remove(self)
@@ -122,9 +122,11 @@ class WalkingMob():
             healthx = self.rect.centerx - self.max_health // 2 - world.scrollx
             healthy = self.rect.y - TILE_SIZE - world.scrolly
             for x in range(self.health):
-                pygame.draw.line(display, GREEN, (healthx + x, healthy), (healthx + x, healthy+2), 1)
+                pygame.draw.line(display, GREEN, (healthx + x, healthy), 
+                                 (healthx + x, healthy+2), 1)
             healthx += self.health
             for x in range(self.max_health - self.health):
-                pygame.draw.line(display, RED, (healthx + x, healthy), (healthx + x, healthy+2), 1)
+                pygame.draw.line(display, RED, (healthx + x, healthy), 
+                                 (healthx + x, healthy+2), 1)
 
 

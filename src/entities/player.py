@@ -1,12 +1,9 @@
-import pygame
 import math
+import pygame
 from settings import TILE_SIZE, GREEN, RED
 from resources import player_images, ITEMS, hurt_sound, death_sound
 from entities.fadingtext import FadingText
 from functions import move
-from resources import ITEMS, player_images, death_sound, polarbear_images, hurt_sound, crow_images, worm_head, worm_body, worm_tail
-from settings import TILE_SIZE, BLACK, RED, GREEN, DISPLAY_WIDTH, DISPLAY_HEIGHT, WHITE
-from functions import move, print_text
 
 class Player():
     def __init__(self, x, y):
@@ -53,7 +50,8 @@ class Player():
 
     def hit(self, weapon, world, mousex, mousey):
         self.chop(ITEMS[weapon]["image"])
-        if abs(self.rect.centerx - mousex - world.scrollx) < 40 and abs(self.rect.centery - mousey - world.scrolly) < 40:
+        if abs(self.rect.centerx - mousex - world.scrollx) < 40 \
+                and abs(self.rect.centery - mousey - world.scrolly) < 40:
             self.hitrect.centerx = mousex+world.scrollx
             self.hitrect.centery = mousey+world.scrolly
         else:
@@ -103,7 +101,8 @@ class Player():
         for drop in list(world.drops):
             if self.rect.colliderect(drop.rect):
                 world.popups.append(FadingText(self.rect.centerx, 
-                                               self.rect.top, "+{} x {}".format(drop.amount, drop.item),
+                                               self.rect.top, "+{} x {}".format(drop.amount, 
+                                                                                drop.item),
                                                world.current_biome))
                 inventory.add_to_inventory(drop.item, drop.amount)
                 world.drops.remove(drop)
@@ -171,6 +170,7 @@ class Player():
             self.rect.y += 1
             if self.rect.collidelist(world.slabs) == -1:
                 self.falling = False
+                self.rect.y -= 1
             else:
                 self.rect.y += 3
         else:

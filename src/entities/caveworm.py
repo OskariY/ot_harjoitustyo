@@ -1,5 +1,5 @@
-import pygame
 import math
+import pygame
 from settings import TILE_SIZE, GREEN, RED
 from entities.particle import Particle
 from entities.drop import DroppedItem
