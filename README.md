@@ -21,6 +21,8 @@ Peli on kirjoitettu Pythonilla ja toteutettu käyttäen pygame-grafiikkakirjasto
 
 [Arkkitehtuuri](https://github.com/yoskari/ot_harjoitustyo/blob/main/dokumentaatio/arkkitehtuuri.md)
 
+[viikko5 release](https://github.com/yoskari/ot_harjoitustyo/releases/tag/viikko5)
+
 ## Asennus
 1. Asenna riippuvuudet komennolla:
 
