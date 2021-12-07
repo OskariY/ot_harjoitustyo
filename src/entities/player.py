@@ -4,6 +4,9 @@ from settings import TILE_SIZE, GREEN, RED
 from resources import player_images, ITEMS, hurt_sound, death_sound
 from entities.fadingtext import FadingText
 from functions import move
+from resources import ITEMS, player_images, death_sound, polarbear_images, hurt_sound, crow_images, worm_head, worm_body, worm_tail
+from settings import TILE_SIZE, BLACK, RED, GREEN, DISPLAY_WIDTH, DISPLAY_HEIGHT, WHITE
+from functions import move, print_text
 
 class Player():
     def __init__(self, x, y):
@@ -205,4 +208,3 @@ class Player():
                 chopx = self.rect.x-scrollx + 2
             chopy = self.rect.y-scrolly
             display.blit(pygame.transform.rotate(pygame.transform.flip(self.chopping_image, self.invert, 0), rot), (chopx, chopy))
-
