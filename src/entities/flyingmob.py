@@ -19,7 +19,7 @@ class FlyingMob():
         self.dead = False
         self.max_health = 25
         self.health = self.max_health
-        self.mobtype = 0
+        self.mobtype = "bird"
         self.collisions = {}
 
     def update(self, player, world):

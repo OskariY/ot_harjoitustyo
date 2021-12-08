@@ -1,0 +1,8 @@
+{
+    "fullscreen": true,
+    "windowed_width": 1600,
+    "windowed_height": 900,
+    "music": true,
+    "mob_spawns": true,
+    "mob_limit": 20
+}

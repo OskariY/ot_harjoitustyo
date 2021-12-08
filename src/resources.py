@@ -2,8 +2,8 @@ import pygame
 from settings import GREEN, WHITE, DISPLAY_WIDTH, DISPLAY_HEIGHT
 
 # directories
-MUSIC_DIR = "src/music/"
-IMAGES_DIR = "src/images/"
+MUSIC_DIR = "resources/music/"
+IMAGES_DIR = "resources/images/"
 
 # music and sounds
 pygame.mixer.init()

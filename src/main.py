@@ -14,15 +14,6 @@ from settings import WINDOW_WIDTH, WINDOW_HEIGHT, DISPLAY_WIDTH, DISPLAY_HEIGHT,
                      BLACK, WHITE, FPS, TILE_SIZE, GRAY, BROWN, GRASSGREEN, MUSIC, \
                      CENTER, FULLSCREEN
 
-# handle arguments
-for arg in sys.argv:
-    if "--nomusic" in arg:
-        MUSIC = False
-    if "--resolution" in arg:
-        resolution = arg.split("=")[1].split("x")
-        WINDOW_WIDTH = int(resolution[0])
-        WINDOW_HEIGHT = int(resolution[1])
-
 # intialize pygame and set up display
 pygame.init()
 if FULLSCREEN:
@@ -32,47 +23,73 @@ else:
     screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 display = pygame.Surface((DISPLAY_WIDTH, DISPLAY_HEIGHT))
 pygame.display.set_caption("Northlands: unspaghettified")
+# pygame clock
+clock = pygame.time.Clock()
+
 # import functions, classes and resources (images, sound etc.) needed
 from resources import ITEMS, CRAFTING_REQUIREMENTS, jump_sound, break_sound, hurt_sound
 from entities.player import Player
 from entities.particle import Particle
 from entities.fadingtext import FadingText
+from entities.walkingmob import WalkingMob
+from entities.flyingmob import FlyingMob
+from entities.caveworm import Worm
 from inventory import Inventory
 from functions import print_text, chunk_debug
 from world import World
+from menus.pause import pause
+from menus.startmenu import startmenu
+from save_functions import load_game
 
 def main():
-    # pygame clock
-    clock = pygame.time.Clock()
-
-    # world object
-    world = World()
-
+    # load game data from save file
+    game_data = load_game(WORLD_NAME)
+    
     # player object
-    player = Player(world.spawn_x, world.spawn_y)
+    player = Player(game_data["player_x"], game_data["player_y"])
+
     # inventory related variables
     inventory = Inventory()
     inv_open = False
-
-    # add some basic items to the inventory
-    inventory.add_to_inventory("axe", 1)
-    inventory.add_to_inventory("pickaxe", 1)
-    inventory.add_to_inventory("shovel", 1)
-    inventory.add_to_inventory("plank", 100)
-    inventory.add_to_inventory("meat", 10)
+    if game_data["inventory"] == []:
+        # add some basic items to the inventory
+        inventory.add_to_inventory("axe", 1)
+        inventory.add_to_inventory("pickaxe", 1)
+        inventory.add_to_inventory("shovel", 1)
+        inventory.add_to_inventory("plank", 100)
+        inventory.add_to_inventory("meat", 10)
+    else:
+        inventory.inventory = game_data["inventory"]
     
+    # world object
+    world = World()
+
+    # load world related variables from the save
+    world.game_map = game_data["game_map"]
+    world.scrollx = game_data["scrollx"]
+    world.scrolly = game_data["scrolly"]
+    world.seed = game_data["seed"]    
+    for x, y, mobtype in game_data["mob_coords"]:
+        if mobtype == "bear":
+            mob = WalkingMob(x, y)
+        elif mobtype == "bird":
+            mob = FlyingMob(x, y)
+        world.mobs.append(mob)
+        world.entities.append(mob)
+
+    for x, y in game_data["worm_coords"]:
+        worm = Worm(x, y)
+        world.worms.append(worm)
+
     inventory.equip_item(0)
 
     # tile breaking related variables
     selected_tile = None
     tile_hits_left = 10
     
-    # if MUSIC setting is True, play music indefinately
-    if MUSIC:
-        pygame.mixer.music.play(-1)
     
     chunk_debug_enabled = False
-    help_dismissed = False 
+    help_dismissed = True 
     help_text = ["WASD: move and jump", 
                  "Mouse1: break block with tools",  
                  "Mouse2: place block", 
@@ -150,6 +167,8 @@ def main():
                         chunk_debug_enabled = False
                     else:
                         chunk_debug_enabled = True
+                if event.key == pygame.K_ESCAPE:
+                    pause(display, screen, clock, world, inventory, player, WORLD_NAME)
             if event.type == pygame.KEYUP:
                     if event.key == pygame.K_d:
                         player.moving_right = False
@@ -373,6 +392,9 @@ def main():
         pygame.display.update()
         clock.tick(FPS)
 
-
 if __name__ == "__main__":
+    # if MUSIC setting is True, play music indefinately
+    if MUSIC:
+        pygame.mixer.music.play(-1)
+    WORLD_NAME = startmenu(display, screen, clock)
     main()

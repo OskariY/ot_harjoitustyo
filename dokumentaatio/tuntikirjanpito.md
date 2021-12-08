@@ -12,4 +12,5 @@
 | 03.12.| 4    | vihollisia (karhu ja lintu) lisätty |
 | 04.12.| 6    | crafting järjestelmä ja luolamato vihollinen lisätty |
 | 07.12.| 4    | testejä ja siistimistä
-| yht   | 42    | | 
+| 08.12 | 4    | valikkojen ja maailmojen tallentamisen implementointi |
+| yht   | 46    | | 

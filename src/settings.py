@@ -1,10 +1,15 @@
+import json
+
+with open("config.json", "r") as f:
+    config = json.load(f)
+
 CHUNK_SIZE = 8
 TILE_SIZE = 16
 
 DISPLAY_WIDTH = 640
 DISPLAY_HEIGHT = 360
-WINDOW_WIDTH = 1600
-WINDOW_HEIGHT = 900
+WINDOW_WIDTH = config["windowed_width"]
+WINDOW_HEIGHT = config["windowed_height"]
 CENTER = [DISPLAY_WIDTH // 2, DISPLAY_HEIGHT // 2]
 FONT = "Helvetica"
 
@@ -20,11 +25,11 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 GRAY = (128,128,128)
 
-MOB_SPAWNS = True
-MOB_LIMIT = 20
-MUSIC = True
+MOB_SPAWNS = config["mob_spawns"]
+MOB_LIMIT = config["mob_limit"]
+MUSIC = config["music"]
 
-FULLSCREEN = False
+FULLSCREEN = config["fullscreen"]
 
 # max fps
 FPS = 60
