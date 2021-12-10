@@ -96,12 +96,12 @@ class Player():
         Args:
             inventory, tiles, mobs, drops, popups, slabs
         """
-        
+
         # drop collisions
         for drop in list(world.drops):
             if self.rect.colliderect(drop.rect):
-                world.popups.append(FadingText(self.rect.centerx, 
-                                               self.rect.top, "+{} x {}".format(drop.amount, 
+                world.popups.append(FadingText(self.rect.centerx,
+                                               self.rect.top, "+{} x {}".format(drop.amount,
                                                                                 drop.item),
                                                world.current_biome))
                 inventory.add_to_inventory(drop.item, drop.amount)
@@ -177,7 +177,7 @@ class Player():
             move(self, world, True)
 
 
-    def draw(self, display, scrollx, scrolly):
+    def draw(self, display, scrollx, scrolly): # pragma: no cover
         """
         draws the player character, health and chopping animation
         Args:

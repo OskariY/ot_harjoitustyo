@@ -79,7 +79,7 @@ class FlyingMob():
         if self.dy < -self.max_speed:
             self.dy = -self.max_speed
 
-    def draw(self, display, world):
+    def draw(self, display, world): # pragma: no cover
         display.blit(pygame.transform.flip(self.image, self.invert, 0), (self.rect.x - world.scrollx, self.rect.y - world.scrolly))
 
         if self.health != self.max_health:

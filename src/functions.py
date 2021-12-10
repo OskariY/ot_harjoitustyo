@@ -1,7 +1,7 @@
 import pygame
 from settings import WHITE, BLACK, BLUE, FONT, TILE_SIZE, CHUNK_SIZE, RED
 
-def print_text(text, x, y, display, allignment=0, size=32, color=BLACK):
+def print_text(text, x, y, display, allignment=0, size=32, color=BLACK): # pragma: no cover
     """
     Prints text onto the screen
     allignments: 0=left, 1=center, 2=right
@@ -67,8 +67,8 @@ def move(entity, world, entity_collisions=False):
                     collisions["up"] = True
 
     entity.collisions = collisions
-    
-def chunk_debug(pos, display, world):
+
+def chunk_debug(pos, display, world): # pragma: no cover
     mousex = pos[0]
     mousey = pos[1]
     for chunk in world.game_map.keys():

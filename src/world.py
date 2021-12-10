@@ -21,7 +21,7 @@ class World():
         self.noise_speed = 0.05
         self.cave_noise_speed = 0.07
         self.cave_noise_multiplier = 30
-        
+
         # game map, format: { "x;y": [[[tilex, tiley], tiletype], [[tilex, tiley], tiletype]] }
         # x;y are chunk (8*8 tiles) coordinates, the chunk is a list containing tiles, which
         # are also lists
@@ -31,12 +31,12 @@ class World():
         self.spawn_y = 0
         # world generation seed
         self.seed = random.randint(-999999, 999999)
-        # current biome        
+        # current biome
         self.current_biome = 1
         # variables for scrolling the world
         self.scrollx = 0
         self.scrolly = 0
-       
+
         self.current_biome = 1
 
         # entity lists
@@ -46,7 +46,7 @@ class World():
         self.particles = []
         self.popups = []
         self.drops = []
-        
+
     def update(self, player):
         # smoothly scroll camera towards the player
         self.scrollx += round((player.rect.centerx-self.scrollx-DISPLAY_WIDTH//2) / 20)
@@ -54,9 +54,9 @@ class World():
 
         self.current_biome = self.get_biome((player.rect.x, player.rect.y))
 
-    def generate_world(self, display, player):
+    def generate_world(self, display, player): # pragma: no cover
         # clear lists affected by the world generation loop
-        
+
         self.tiles = []
         self.buildables = []
         self.glows = []
@@ -78,7 +78,7 @@ class World():
                 target_chunk = str(target_x) + ';' + str(target_y)
                 if target_chunk not in self.game_map:
                     self.game_map[target_chunk] = self.generate_chunk(target_x, target_y)
-                
+
                 if MOB_SPAWNS:
                     # caveworm spawns
                     if self.game_map[target_chunk][1] == 3 and random.randint(1, 30000) == 1 and self.current_biome == 3:
@@ -122,7 +122,7 @@ class World():
                                     bear = WalkingMob(tile[0][0]*TILE_SIZE, tile[0][1]*TILE_SIZE-48)
                                     self.mobs.append(bear)
                                     self.entities.append(bear)
-                        
+
                         #if is_night == True:
                         #    if tile[1] in ["snowy grass", "grass"]:
                         #        if random.randint(1, 10000) == 1:
@@ -290,7 +290,7 @@ class World():
                                                           0,
                                                           drop_name,
                                                           drop_amount))
-                       
+
                             # spawn particles with the color defaulting to brown
                             particle_color = BROWN
                             if tile[1] in ["stone", "rock", "coal block"]:
@@ -298,7 +298,7 @@ class World():
                             elif tile[1] in ["plant", "grass"]:
                                 particle_color = GRASSGREEN
                             for i in range(10):
-                                self.particles.append(Particle(tilerect.centerx, 
+                                self.particles.append(Particle(tilerect.centerx,
                                                                tilerect.centery,
                                                                particle_color))
                             # play the breaking sound
@@ -308,7 +308,7 @@ class World():
     def get_chunk(self, pos):
         """
         Get chunk based on coordinates (pos)
-        
+
         Args:
             pos
         Returns:
@@ -345,7 +345,7 @@ class World():
         Args:
             pos, blocktype, inventory, player, item_cost=True
         """
-        
+
         targettile = self.get_tile(pos)
         furniture = False
         if targettile != None:
@@ -357,7 +357,8 @@ class World():
             elif ITEMS[targettile[1]]["furniture"] == True:
                 furniture = True
             # if a tile already exists in the target location, do nothing
-                return None 
+            else:
+                return None
         posx = pos[0]
         posy = pos[1]
         if abs(posx - player.rect.centerx) < 5*TILE_SIZE \
@@ -370,28 +371,28 @@ class World():
                     target_x = int(chunkx) * CHUNK_SIZE * TILE_SIZE + x_pos * TILE_SIZE
                     target_y = int(chunky) * CHUNK_SIZE * TILE_SIZE + y_pos * TILE_SIZE
                     tilerect = pygame.Rect(target_x, target_y, TILE_SIZE, TILE_SIZE)
-                    
+
                     if tilerect.collidepoint(posx, posy):
                         target_block = [[target_x // TILE_SIZE, target_y // TILE_SIZE], blocktype]
                         if not self.tile_exists(chunk, target_x // TILE_SIZE,
                                                 target_y // TILE_SIZE):
-                            if not tilerect.colliderect(player.rect) or furniture == True:
+                            if not tilerect.colliderect(player.rect) or furniture is True:
                                 self.game_map[chunk][0].append(target_block)
                                 build_sound.play()
                                 if item_cost:
                                     inventory.remove_item(inventory.equipped, 1)
                         else:
-                            if ITEMS[inventory.equipped]["furniture"] == True:
-                                existing_tiles = self.tile_exists(chunk, target_x // TILE_SIZE, 
+                            if ITEMS[inventory.equipped]["furniture"] is True:
+                                existing_tiles = self.tile_exists(chunk, target_x // TILE_SIZE,
                                                                   target_y // TILE_SIZE)
                                 if len(existing_tiles) == 1:
                                     blockname = existing_tiles[0][1]
-                                    if equipped != blockname:
+                                    if inventory.equipped != blockname:
                                         if blockname == "plank wall":
                                             self.game_map[chunk][0].append(target_block)
                                             build_sound.play()
                                             if item_cost:
-                                                inventory.remove_inventory_item(equipped, 1)
+                                                inventory.remove_item(inventory.equipped, 1)
 
     def get_tile(self, pos):
         """
@@ -402,7 +403,7 @@ class World():
             tile or None if no tile is found
         """
         chunk = self.get_chunk(pos)
-       
+
         # loop through the tiles in the chunk, if a tile exists at pos, return it
         tilerect = pygame.Rect(0, 0, TILE_SIZE, TILE_SIZE)
         for tile in self.game_map[chunk][0]:
@@ -411,7 +412,7 @@ class World():
             if tilerect.collidepoint(pos):
                 return tile
 
-    def draw_tile_outline(self, pos, equipped, display, player):
+    def draw_tile_outline(self, pos, equipped, display, player): # pragma: no cover
         """
         Draws borders around breakable tiles when holding a tool and buildable tiles
         when holding a buildable
@@ -444,7 +445,7 @@ class World():
                                 else:
                                     color = BLACK
                                 pygame.draw.rect(display, color, tilerect, 1)
- 
+
     def get_biome(self, pos):
         for chunk, chunkdata in self.game_map.items():
             chunkx, chunky = chunk.split(";")

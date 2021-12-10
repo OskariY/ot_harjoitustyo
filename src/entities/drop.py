@@ -9,12 +9,12 @@ class DroppedItem():
     Args:
         x, y, dx, dy, item, amount=1
     """
-    
+
     def __init__(self, x, y, dx, dy, item, amount=1):
         self.image = ITEMS[item]["image"]
         #if item in ["dirt", "stone", "plank", "plank wall", "rock"]:
         size = TILE_SIZE - 4
-        
+
         self.image = pygame.transform.scale(self.image, (size, size))
         self.rect = pygame.Rect(x, y, self.image.get_width(), self.image.get_height())
         self.item = item
@@ -37,6 +37,6 @@ class DroppedItem():
             if self.collisions["left"] or self.collisions["right"]:
                 self.dx = 0
 
-    def draw(self, display, scrollx, scrolly):
+    def draw(self, display, scrollx, scrolly): # pragma: no cover
         display.blit(self.image, (self.rect.x - scrollx, self.rect.y - scrolly))
 

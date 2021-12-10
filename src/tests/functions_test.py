@@ -43,7 +43,7 @@ class TestMove(unittest.TestCase):
 
     def test_move_y_collisions(self):
         self.obj.dy = 3
-        
+
         self.obj.rect.bottom = 14
         move(self.obj, self.world)
         # rect bottom should be stopped at 16 instead of going up to 17
@@ -57,8 +57,8 @@ class TestMove(unittest.TestCase):
             })
 
     def test_move_x_collisions(self):
-        self.obj.dx = 5 
-        
+        self.obj.dx = 5
+
         self.obj.rect.y = 16
         self.obj.rect.right = -65
         move(self.obj, self.world)

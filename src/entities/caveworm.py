@@ -1,4 +1,5 @@
 import math
+import random
 import pygame
 from settings import TILE_SIZE, GREEN, RED
 from entities.particle import Particle
@@ -19,7 +20,7 @@ class Worm():
         self.head_rect = pygame.Rect(x, y, TILE_SIZE - self.margin, TILE_SIZE - self.margin)
         self.head_image = worm_head
         self.head_angle = math.radians(-90)
-        
+
         # body
         self.body_rects = []
         self.body_images = []
@@ -29,12 +30,12 @@ class Worm():
             self.body_images.append(worm_body)
             self.body_rects.append(pygame.Rect(x, y, TILE_SIZE - self.margin, TILE_SIZE - self.margin))
             self.body_angles.append(math.radians(-90))
-        
+
         # tail
         self.tail_rect = pygame.Rect(x, y+TILE_SIZE, TILE_SIZE - self.margin, TILE_SIZE - self.margin)
         self.tail_image = worm_tail
         self.tail_angle = math.radians(-90)
-        
+
         self.speed = 2
         self.body_speed = self.speed + 1
         self.aggroed = False
@@ -49,7 +50,7 @@ class Worm():
             world.worms.remove(self)
         # death
         if self.health <= 0:
-            world.drops.append(DroppedItem(self.head_rect.centerx, self.head_rect.centery, 
+            world.drops.append(DroppedItem(self.head_rect.centerx, self.head_rect.centery,
                                            0, 0, "meat", random.randint(1, 10)))
             for i in range(100):
                 world.particles.append(Particle(self.head_rect.centerx, self.head_rect.centery, RED))
@@ -103,7 +104,7 @@ class Worm():
                         if not body.colliderect(self.body_rects[i-1]):
                             body.x += round(speed_x)
                             body.y += round(speed_y)
-                
+
                 # tail movement
                 distance_x = self.body_rects[-1].x - self.tail_rect.x
                 distance_y = self.body_rects[-1].y - self.tail_rect.y
@@ -114,17 +115,11 @@ class Worm():
                     self.tail_rect.x += round(speed_x)
                     self.tail_rect.y += round(speed_y)
         else:
-            # agro to player primarily, but also attack other mobs if they happen to be in the caves
             if abs(player.rect.x - self.head_rect.x) < 300:
                 self.target = player
                 self.aggroed = True
-            for mob in world.mobs:
-                if abs(mob.rect.x - self.head_rect.x) < 300 and abs(mob.rect.y - self.head_rect.y) < 300:
-                    self.target = mob
-                    self.aggroed = True
-                    break
 
-    def draw(self, display, scrollx, scrolly):
+    def draw(self, display, scrollx, scrolly): # pragma: no cover
         display.blit(pygame.transform.rotate(self.head_image, math.degrees(-self.head_angle) - 90), (self.head_rect.x-scrollx-self.margin//2, self.head_rect.y-scrolly-self.margin//2))
         for i, image in enumerate(self.body_images):
             display.blit(pygame.transform.rotate(image, math.degrees(-self.body_angles[i]) - 90), (self.body_rects[i].x - scrollx-self.margin//2, self.body_rects[i].y - scrolly-self.margin//2))

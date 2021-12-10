@@ -18,12 +18,12 @@ class WalkingMob():
         self.rect.x = x
         self.rect.y = y
 
-        self.mobtype = mobtype # makes retextured mobs with same logic possible 
+        self.mobtype = mobtype # makes retextured mobs with same logic possible
         self.inverse = 0 # which way the mob is facing
 
         self.image_index = 0
         self.animation_counter = 0
- 
+
         self.aggroed = False
         self.speed = 1
         self.max_speed = 3
@@ -33,10 +33,10 @@ class WalkingMob():
         self.jumps = 1
         self.gravity = 0.4
         self.max_gravity = 8
- 
+
         self.max_health = 50
         self.health = self.max_health
- 
+
         self.collisions = {
             "right": False,
             "left": False,
@@ -75,7 +75,7 @@ class WalkingMob():
             if self.aggroed:
                 if self.rect.centerx < player.rect.centerx - TILE_SIZE:
                     if self.dx < self.speed:
-                        self.dx += 0.5 
+                        self.dx += 0.5
                     self.inverse = 1
                 elif self.rect.centerx > player.rect.centerx + TILE_SIZE:
                     if self.dx > -self.speed:
@@ -86,7 +86,7 @@ class WalkingMob():
                 self.dx = self.max_speed
             if self.dx < -self.max_speed:
                 self.dx = -self.max_speed
-           
+
             # soft speed gap
             if self.dx > self.speed:
                 self.dx -= 0.1
@@ -108,7 +108,7 @@ class WalkingMob():
                     if self.dy < self.max_gravity:
                         self.dy += self.gravity
 
-    def draw(self, display, world):
+    def draw(self, display, world): # pragma: no cover
         drawx = self.rect.x-world.scrollx
         drawy = self.rect.y-world.scrolly
 
@@ -122,11 +122,11 @@ class WalkingMob():
             healthx = self.rect.centerx - self.max_health // 2 - world.scrollx
             healthy = self.rect.y - TILE_SIZE - world.scrolly
             for x in range(self.health):
-                pygame.draw.line(display, GREEN, (healthx + x, healthy), 
+                pygame.draw.line(display, GREEN, (healthx + x, healthy),
                                  (healthx + x, healthy+2), 1)
             healthx += self.health
             for x in range(self.max_health - self.health):
-                pygame.draw.line(display, RED, (healthx + x, healthy), 
+                pygame.draw.line(display, RED, (healthx + x, healthy),
                                  (healthx + x, healthy+2), 1)
 
 

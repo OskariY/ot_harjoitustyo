@@ -44,7 +44,7 @@ from save_functions import load_game
 def main():
     # load game data from save file
     game_data = load_game(WORLD_NAME)
-    
+
     # player object
     player = Player(game_data["player_x"], game_data["player_y"])
 
@@ -60,7 +60,7 @@ def main():
         inventory.add_to_inventory("meat", 10)
     else:
         inventory.inventory = game_data["inventory"]
-    
+
     # world object
     world = World()
 
@@ -68,7 +68,7 @@ def main():
     world.game_map = game_data["game_map"]
     world.scrollx = game_data["scrollx"]
     world.scrolly = game_data["scrolly"]
-    world.seed = game_data["seed"]    
+    world.seed = game_data["seed"]
     for x, y, mobtype in game_data["mob_coords"]:
         if mobtype == "bear":
             mob = WalkingMob(x, y)
@@ -86,13 +86,12 @@ def main():
     # tile breaking related variables
     selected_tile = None
     tile_hits_left = 10
-    
-    
+
     chunk_debug_enabled = False
-    help_dismissed = True 
-    help_text = ["WASD: move and jump", 
-                 "Mouse1: break block with tools",  
-                 "Mouse2: place block", 
+    help_dismissed = True
+    help_text = ["WASD: move and jump",
+                 "Mouse1: break block with tools",
+                 "Mouse2: place block",
                  "1-6: select hotbar items",
                  "TAB: open/close inventory",
                  "",
@@ -109,7 +108,7 @@ def main():
         truemousepos = (mousex + world.scrollx, mousey + world.scrolly)
 
         # update world variables (e.g. scroll)
-        world.update(player)  
+        world.update(player)
         # generate world
         world.generate_world(display, player)
 
@@ -188,10 +187,10 @@ def main():
                                 if inventory.inventory[i][1] != "":
                                     inventory.inv_select1 = i
                                     break
-                        
+
                         # crafting selections
                         for i, selectbutton in enumerate(inventory.crafting_selection_rects):
-                            if selectbutton.collidepoint((mousepos[0] - inventory.invx, 
+                            if selectbutton.collidepoint((mousepos[0] - inventory.invx,
                                                           mousepos[1] - inventory.invy)):
                                 inventory.crafting_item_selected = i
                                 inventory.crafting_item_rect = selectbutton
@@ -243,13 +242,14 @@ def main():
                                     player.health = player.max_health
                                 else:
                                     player.health += ITEMS[inventory.equipped]["heal"]
-                                inventory.remove_item(inventory.equipped, 1)
-                                world.popups.append(FadingText(player.rect.centerx, 
-                                                    player.rect.top, 
+                                world.popups.append(FadingText(player.rect.centerx,
+                                                    player.rect.top,
                                                     "+{} HP".format(str(ITEMS[inventory.equipped]["heal"])), 
                                                     world.current_biome,
                                                     GRASSGREEN
                                                     ))
+                                inventory.remove_item(inventory.equipped, 1)
+
                             # tool logic
                             if ITEMS[inventory.equipped]["tool"] and inventory.in_inventory(inventory.equipped):
                                 player.hit(inventory.equipped, world, mousex, mousey)
@@ -301,7 +301,7 @@ def main():
                             # place tiles
                             if ITEMS[inventory.equipped]["build"] and inventory.in_inventory(inventory.equipped):
                                 if world.get_next_tiles(truemousepos) == True:
-                                    world.place_tile(truemousepos, 
+                                    world.place_tile(truemousepos,
                                                      inventory.equipped,
                                                      inventory,
                                                      player)
@@ -347,8 +347,8 @@ def main():
                 player.health -= 1
                 if player.sound_cooldown <= 0:
                     hurt_sound.play()
-                    player.sound_cooldown = 10 
-        
+                    player.sound_cooldown = 10
+
         for worm in world.worms:
             worm.update(player, world)
             worm.draw(display, world.scrollx, world.scrolly)
@@ -359,7 +359,7 @@ def main():
         # draw tile outlines
         if not inv_open:
             world.draw_tile_outline(truemousepos, inventory.equipped, display, player)
-       
+
         if world.current_biome == 1:
             biomename = "Forest"
         elif world.current_biome == 2:
@@ -368,9 +368,9 @@ def main():
             biomename = "Cave"
         else:
             biomename = world.current_biome
-        
+
         if not help_dismissed:
-            help_x = CENTER[0] - 96 
+            help_x = CENTER[0] - 96
             help_y = CENTER[1] - 64
             print_text("Controls:", CENTER[0], help_y - 20, display, 1, 18)
             for t in help_text:
@@ -383,7 +383,7 @@ def main():
                 fps_color = BLACK
             print_text(f"biome: {biomename}", 0, 0, display, 0, 10, fps_color)
             print_text(f"FPS: {int(clock.get_fps())}", DISPLAY_WIDTH, 0, display, 2, 10, fps_color)
-        
+
         if chunk_debug_enabled:
             chunk_debug(truemousepos, display, world)
 
