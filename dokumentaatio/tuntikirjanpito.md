@@ -13,4 +13,6 @@
 | 04.12.| 6    | crafting järjestelmä ja luolamato vihollinen lisätty |
 | 07.12.| 4    | testejä ja siistimistä
 | 08.12 | 4    | valikkojen ja maailmojen tallentamisen implementointi |
-| yht   | 46    | | 
+| 09.12 | 4    | testejä ja bugin korjaamista |
+| 10.12 | 2    | poistin vahingossa kotihakemiston, edellisen päivän työn uudelleentekemistä |
+| yht   | 52   | |
