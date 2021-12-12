@@ -3,7 +3,7 @@ import pygame
 from settings import TILE_SIZE, GREEN, RED
 from resources import player_images, ITEMS, hurt_sound, death_sound
 from entities.fadingtext import FadingText
-from functions import move
+from functions import move, draw_health_bar
 
 class Player():
     def __init__(self, x, y):
@@ -49,6 +49,11 @@ class Player():
         self.chopping_image = image
 
     def hit(self, weapon, world, mousex, mousey):
+        """
+        Invokes the chopping animation and "hits" towards the direction of the mouse
+        by placing an invisible rectangle towards the mouse and checking for collisions
+        with mobs
+        """
         self.chop(ITEMS[weapon]["image"])
         if abs(self.rect.centerx - mousex - world.scrollx) < 40 \
                 and abs(self.rect.centery - mousey - world.scrolly) < 40:
@@ -94,7 +99,7 @@ class Player():
         updates the player object
 
         Args:
-            inventory, tiles, mobs, drops, popups, slabs
+            inventory, world
         """
 
         # drop collisions
@@ -186,14 +191,8 @@ class Player():
         # draw player to the screen
         display.blit(pygame.transform.flip(self.image, self.invert, 0), (self.rect.x-scrollx, self.rect.y-scrolly))
         # draw the health bar if health is below maximum
-        if self.health < self.max_health:
-            healthx = self.rect.centerx - self.max_health // 2 - scrollx
-            healthy = self.rect.y - TILE_SIZE - scrolly
-            for x in range(self.health):
-                pygame.draw.line(display, GREEN, (healthx + x, healthy), (healthx + x, healthy+2), 1)
-            healthx += self.health
-            for x in range(self.max_health - self.health):
-                pygame.draw.line(display, RED, (healthx + x, healthy), (healthx + x, healthy+2), 1)
+        draw_health_bar(self.rect.centerx-scrollx, self.rect.y-TILE_SIZE-scrolly,
+                        display, self.health, self.max_health)
 
         # chopping animation
         if self.chopping_animation > 0:

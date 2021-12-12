@@ -3,9 +3,12 @@ from settings import TILE_SIZE, GREEN, RED
 from resources import crow_images
 from entities.particle import Particle
 from entities.drop import DroppedItem
-from functions import move
+from functions import move, draw_health_bar
 
 class FlyingMob():
+    """
+    An enemy mob which flies towards the player
+    """
     def __init__(self, x, y):
         self.rect = pygame.Rect(x, y, TILE_SIZE, TILE_SIZE)
         self.image = crow_images[0]
@@ -23,6 +26,9 @@ class FlyingMob():
         self.collisions = {}
 
     def update(self, player, world):
+        """
+        Updates the health, animation and movement of the object
+        """
         # despawning
         if self.rect.x < player.rect.x - 1000 or self.rect.x > player.rect.x + 1000:
             print("Bird despawned")
@@ -80,15 +86,10 @@ class FlyingMob():
             self.dy = -self.max_speed
 
     def draw(self, display, world): # pragma: no cover
+        """
+        Draws the Flying Mob object
+        """
         display.blit(pygame.transform.flip(self.image, self.invert, 0), (self.rect.x - world.scrollx, self.rect.y - world.scrolly))
 
-        if self.health != self.max_health:
-            healthx = self.rect.centerx - self.max_health // 2 - world.scrollx
-            healthy = self.rect.y - TILE_SIZE - world.scrolly
-            for x in range(self.health):
-                pygame.draw.line(display, GREEN, (healthx + x, healthy), (healthx + x, healthy+2), 1)
-            healthx += self.health
-            for x in range(self.max_health - self.health):
-                pygame.draw.line(display, RED, (healthx + x, healthy), (healthx + x, healthy+2), 1)
-
-
+        draw_health_bar(self.rect.centerx-world.scrollx, self.rect.y-TILE_SIZE-world.scrolly,
+                        display, self.health, self.max_health)

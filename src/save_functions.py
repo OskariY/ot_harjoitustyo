@@ -2,15 +2,24 @@ import pickle
 import random
 
 def write_game_data(name, game_data):
+    """
+    Helper function that writes data to a save file
+    """
     with open("saves/{}".format(name), "wb") as f:
         pickle.dump(game_data, f)
 
 def load_game(name):
+    """
+    Helper function that loads data from a save file
+    """
     with open("saves/{}".format(name), "rb") as f:
         game_data = pickle.load(f)
     return game_data
 
 def save_game(name, world, inventory, player):
+    """
+    Saves games files like the game_map, player position, scroll, inventory and mob positions
+    """
     game_data = {
         "game_map": world.game_map,
         "spawn_x": world.spawn_x,
@@ -34,6 +43,9 @@ def save_game(name, world, inventory, player):
     write_game_data(name, game_data)
 
 def create_world(name):
+    """
+    Creates a new world save
+    """
     game_data = {
         "game_map": {},
         "spawn_x": 0,

@@ -5,6 +5,7 @@ from settings import TILE_SIZE, GREEN, RED
 from entities.particle import Particle
 from entities.drop import DroppedItem
 from resources import worm_head, worm_body, worm_tail
+from functions import draw_health_bar
 
 class Worm():
     """
@@ -45,6 +46,9 @@ class Worm():
         self.health = self.max_health
 
     def update(self, player, world):
+        """
+        Handles movement of all the worm parts, aggroing to the player and health
+        """
         # despawn if player is too far
         if abs(player.rect.x - self.head_rect.x) > 1000 and abs(player.rect.y - self.head_rect.y) > 1000:
             world.worms.remove(self)
@@ -120,17 +124,12 @@ class Worm():
                 self.aggroed = True
 
     def draw(self, display, scrollx, scrolly): # pragma: no cover
+        """
+        Draws all the worm parts
+        """
         display.blit(pygame.transform.rotate(self.head_image, math.degrees(-self.head_angle) - 90), (self.head_rect.x-scrollx-self.margin//2, self.head_rect.y-scrolly-self.margin//2))
         for i, image in enumerate(self.body_images):
             display.blit(pygame.transform.rotate(image, math.degrees(-self.body_angles[i]) - 90), (self.body_rects[i].x - scrollx-self.margin//2, self.body_rects[i].y - scrolly-self.margin//2))
         display.blit(pygame.transform.rotate(self.tail_image, math.degrees(-self.tail_angle) - 90), (self.tail_rect.x - scrollx-self.margin//2, self.tail_rect.y - scrolly-self.margin//2))
-        if self.health < self.max_health:
-            healthx = self.head_rect.centerx - self.max_health // 2 - scrollx
-            healthy = self.head_rect.y - TILE_SIZE*2 - scrolly
-            for x in range(self.health):
-                pygame.draw.line(display, GREEN, (healthx + x, healthy), (healthx + x, healthy+2), 1)
-            healthx += self.health
-            for x in range(self.max_health - self.health):
-                pygame.draw.line(display, RED, (healthx + x, healthy), (healthx + x, healthy+2), 1)
-
-
+        draw_health_bar(self.head_rect.centerx-scrollx, self.head_rect.y-TILE_SIZE*2-scrolly,
+                        display, self.health, self.max_health)

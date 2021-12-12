@@ -11,7 +11,7 @@ from world import World
 from settings import DISPLAY_WIDTH, DISPLAY_HEIGHT, WHITE, BLACK, GRAY, CENTER
 from functions import print_text
 from resources import background_image
-from save_functions import create_world 
+from save_functions import create_world
 
 class MenuWorldSave():
     def __init__(self, name, x, y):
@@ -76,13 +76,14 @@ def startmenu(display, screen, clock):
                     if event.key == pygame.K_BACKSPACE:
                         new_world_name = new_world_name[:-1]
                     elif event.key == pygame.K_RETURN:
-                        create_world(new_world_name)
-                        if len(saved_worlds) > 0:
-                            y = saved_worlds[-1].rect.y + 20
-                        else:
-                            y = 8
-                        saved_worlds.append(MenuWorldSave(new_world_name, 8, y))
-                        create_world_screen = 1
+                        if len(new_world_name) > 0:
+                            create_world(new_world_name)
+                            if len(saved_worlds) > 0:
+                                y = saved_worlds[-1].rect.y + 20
+                            else:
+                                y = 8
+                            saved_worlds.append(MenuWorldSave(new_world_name, 8, y))
+                            create_world_screen = 1
                     else:
                         new_world_name += event.unicode
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -119,13 +120,14 @@ def startmenu(display, screen, clock):
                         if new_world_back.collidepoint((mousex, mousey)):
                             create_world_screen = 1
                         if new_world_create.collidepoint((mousex, mousey)):
-                            create_world(new_world_name)
-                            if len(saved_worlds) > 0:
-                                y = saved_worlds[-1].rect.y + 20
-                            else:
-                                y = 8
-                            saved_worlds.append(MenuWorldSave(new_world_name, 8, y))
-                            create_world_screen = 1
+                            if len(new_world_name) > 0:
+                                create_world(new_world_name)
+                                if len(saved_worlds) > 0:
+                                    y = saved_worlds[-1].rect.y + 20
+                                else:
+                                    y = 8
+                                saved_worlds.append(MenuWorldSave(new_world_name, 8, y))
+                                create_world_screen = 1
 
                     else:
                         if start_game.collidepoint((mousex, mousey)):

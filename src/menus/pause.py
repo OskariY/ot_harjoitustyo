@@ -35,7 +35,7 @@ def pause(display, screen, clock, world, inventory, player, world_name):
                     if menu_button.collidepoint((mousex, mousey)):
                         paused = False
                         save_game(world_name, world, inventory, player)
-                        startmenu(display, screen, clock)
+                        return startmenu(display, screen, clock)
                     if save_button.collidepoint((mousex, mousey)):
                         save_game(world_name, world, inventory, player)
 

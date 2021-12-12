@@ -39,11 +39,11 @@ from functions import print_text, chunk_debug
 from world import World
 from menus.pause import pause
 from menus.startmenu import startmenu
-from save_functions import load_game
+from save_functions import load_game, create_world
 
-def main():
+def main(world_name):
     # load game data from save file
-    game_data = load_game(WORLD_NAME)
+    game_data = load_game(world_name)
 
     # player object
     player = Player(game_data["player_x"], game_data["player_y"])
@@ -92,8 +92,9 @@ def main():
     help_text = ["WASD: move and jump",
                  "Mouse1: break block with tools",
                  "Mouse2: place block",
-                 "1-6: select hotbar items",
+                 "1-5: select hotbar items",
                  "TAB: open/close inventory",
+                 "ESC: open/close pause menu",
                  "",
                  "press h to open/close help"]
 
@@ -153,21 +154,25 @@ def main():
                     inventory.equip_item(3)
                 if event.key == pygame.K_5:
                     inventory.equip_item(4)
-                if event.key == pygame.K_q:
-                    pygame.quit()
-                    sys.exit()
+                if event.key == pygame.K_F8:
+                    player.rect.y += 1000
+                if event.key == pygame.K_F9:
+                    create_world("test")
+                    main("test")
                 if event.key == pygame.K_h:
                     if help_dismissed:
                         help_dismissed = False
                     else:
                         help_dismissed = True
-                if event.key == pygame.K_o:
+                if event.key == pygame.K_F3:
                     if chunk_debug_enabled:
                         chunk_debug_enabled = False
                     else:
                         chunk_debug_enabled = True
                 if event.key == pygame.K_ESCAPE:
-                    pause(display, screen, clock, world, inventory, player, WORLD_NAME)
+                    world_name = pause(display, screen, clock, world, inventory, player, world_name)
+                    if world_name:
+                        main(world_name)
             if event.type == pygame.KEYUP:
                     if event.key == pygame.K_d:
                         player.moving_right = False
@@ -308,6 +313,17 @@ def main():
                             # elif inventory.equipped == "hoe" and get_tile(mousepos)[1] == "dirt":
                             #     remove_tile(mousepos, True)
                             #     place_tile(mousepos, "grass", False)
+                    if event.button in [4, 5]:
+                        if event.button == 4:
+                            inventory.index_equipped += 1
+                        elif event.button == 5:
+                            inventory.index_equipped -= 1
+
+                        if inventory.index_equipped < 0:
+                            inventory.index_equipped = 4
+                        if inventory.index_equipped > 4:
+                            inventory.index_equipped = 0
+                        inventory.equip_item(inventory.index_equipped)
             if event.type == pygame.MOUSEBUTTONUP:
                 # inventory mouse controls
                 if inv_open:
@@ -381,11 +397,13 @@ def main():
                 fps_color = WHITE
             else:
                 fps_color = BLACK
-            print_text(f"biome: {biomename}", 0, 0, display, 0, 10, fps_color)
-            print_text(f"FPS: {int(clock.get_fps())}", DISPLAY_WIDTH, 0, display, 2, 10, fps_color)
 
+        print_text(f"FPS: {int(clock.get_fps())}", 1, 0, display, 0, 10, fps_color)
         if chunk_debug_enabled:
             chunk_debug(truemousepos, display, world)
+            print_text(f"current_biome: {biomename}", 1, 10, display, 0, 10, fps_color)
+            print_text(f"X: {player.rect.x} Y: {player.rect.y}", 1, 20, display, 0, 10, fps_color)
+            print_text(f"seed: {world.seed}", 1, 30, display, 0, 10, fps_color)
 
         # draw display surface onto screen, update it and clock the fps
         screen.blit(pygame.transform.scale(display, (WINDOW_WIDTH, WINDOW_HEIGHT)), (0, 0))
@@ -396,5 +414,9 @@ if __name__ == "__main__":
     # if MUSIC setting is True, play music indefinately
     if MUSIC:
         pygame.mixer.music.play(-1)
-    WORLD_NAME = startmenu(display, screen, clock)
-    main()
+    if "--debugrun" in sys.argv:
+        create_world("test")
+        world_name = "test"
+    else:
+        world_name = startmenu(display, screen, clock)
+    main(world_name)

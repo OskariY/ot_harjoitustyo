@@ -14,5 +14,6 @@
 | 07.12.| 4    | testejä ja siistimistä
 | 08.12 | 4    | valikkojen ja maailmojen tallentamisen implementointi |
 | 09.12 | 4    | testejä ja bugin korjaamista |
-| 10.12 | 2    | poistin vahingossa kotihakemiston, edellisen päivän työn uudelleentekemistä |
-| yht   | 52   | |
+| 10.12 | 2    | poistin vahingossa kotihakemiston, edellisen päivän työn palauttamista ja uudelleentekemistä |
+| 12.12 | 2    | bugien korjausta ja dokumentointia |
+| yht   | 54   | |

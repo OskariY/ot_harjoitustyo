@@ -146,3 +146,11 @@ class TestWorld(unittest.TestCase):
         chunk = [[[[TILE_SIZE*2, 0], "dirt"]], 1]
         self.world.game_map["0;0"] = chunk
         self.assertEqual(self.world.get_biome((0, 0)), 1)
+
+    def test_world_generation_correct_format(self):
+        chunk = self.world.generate_chunk(0, 0)
+        # the chunk should be a list that contains an other list of any existing tiles and
+        # the biome which is stored as an integer
+        self.assertEqual(type(chunk), list)
+        self.assertEqual(type(chunk[0]), list)
+        self.assertEqual(type(chunk[1]), int)

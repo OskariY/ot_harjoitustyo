@@ -4,6 +4,9 @@ from settings import CENTER, TILE_SIZE, GRAY, WHITE, BLACK, BROWN, RED
 from functions import print_text
 
 class Inventory():
+    """
+    Handles the inventory, hotbar, crafting and all actions related to them
+    """
     def __init__(self):
         self.surface = pygame.Surface((300, 32*6+2))
         self.invx = CENTER[0] - self.surface.get_width() // 2
@@ -11,6 +14,7 @@ class Inventory():
         self.inv_select1 = -1
         self.inv_select2 = -1
         self.equipped = ""
+        self.index_equipped = 0
 
         self.inventory = [] # format: [ [rect, item, amount, equipped] ]
         x = 2
@@ -57,6 +61,9 @@ class Inventory():
                 x = 32*5+12 + self.crafting_selection_width
 
     def draw(self, inv_open, display, mousepos): # pragma: no cover
+        """
+        Draws the inventory/crafting interface if it's open, otherwise just draws the hotbar
+        """
         if inv_open:
             self.surface.fill(GRAY)
             x = 2
@@ -253,5 +260,6 @@ class Inventory():
             if i == index:
                 item[3] = True
                 self.equipped = self.inventory[index][1]
+                self.index_equipped = i
             else:
                 item[3] = False

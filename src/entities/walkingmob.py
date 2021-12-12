@@ -4,9 +4,14 @@ from resources import polarbear_images
 from entities.drop import DroppedItem
 from entities.particle import Particle
 from settings import TILE_SIZE, DISPLAY_WIDTH, DISPLAY_HEIGHT, GREEN, RED
-from functions import move
+from functions import move, draw_health_bar
 
 class WalkingMob():
+    """
+    Class for a mob that tries to walk towards the player and cause damage
+    the mobtype parameter allows for adding other mobs with the same "AI",
+    but different textures.
+    """
     def __init__(self, x, y, mobtype="bear"):
         self.images = polarbear_images
         self.animation_repeat = 10
@@ -45,6 +50,10 @@ class WalkingMob():
             }
 
     def update(self, player, world):
+        """
+        Updates the WalkingMob object, handling things like movement, health and aggression
+        to the player
+        """
         if abs(self.rect.x - player.rect.x) > 700 or abs(self.rect.y < player.rect.y) > 700:
             world.mobs.remove(self)
 
@@ -109,6 +118,9 @@ class WalkingMob():
                         self.dy += self.gravity
 
     def draw(self, display, world): # pragma: no cover
+        """
+        Draws the mob and a health bar if it has taken damage
+        """
         drawx = self.rect.x-world.scrollx
         drawy = self.rect.y-world.scrolly
 
@@ -117,16 +129,5 @@ class WalkingMob():
         image.set_colorkey(GREEN)
         display.blit(image, (drawx, drawy))
 
-        # draw health
-        if self.health != self.max_health:
-            healthx = self.rect.centerx - self.max_health // 2 - world.scrollx
-            healthy = self.rect.y - TILE_SIZE - world.scrolly
-            for x in range(self.health):
-                pygame.draw.line(display, GREEN, (healthx + x, healthy),
-                                 (healthx + x, healthy+2), 1)
-            healthx += self.health
-            for x in range(self.max_health - self.health):
-                pygame.draw.line(display, RED, (healthx + x, healthy),
-                                 (healthx + x, healthy+2), 1)
-
-
+        draw_health_bar(self.rect.centerx-world.scrollx, self.rect.y-TILE_SIZE-world.scrolly,
+                        display, self.health, self.max_health)

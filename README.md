@@ -30,12 +30,6 @@ Peli on kirjoitettu Pythonilla ja toteutettu käyttäen pygame-grafiikkakirjasto
 poetry install
 ```
 
-2. Käynnistä sovellus komennolla:
-
-```bash
-poetry run invoke start
-```
-
 ## Komentorivitoiminnot
 
 ### Ohjelman suorittaminen
@@ -46,19 +40,8 @@ Ohjelman pystyy suorittamaan komennolla:
 poetry run invoke start
 ```
 
-### Kontrollit
-A: liiku vasemmalle
-
-D: liiku oikealle
-
-W: hyppää
-
-TAB: avaa/sulje inventory
-
-MOUSE1: riko palikoita, lyö
-
-MOUSE2: aseta palikoita (pitää olla valittuna)
-
+### Käyttöohje
+[Käyttöohje](https://github.com/yoskari/ot_harjoitustyo/blob/main/dokumentaatio/arkkitehtuuri.md)
 
 ### Testaus
 
@@ -76,4 +59,4 @@ Testikattavuusraportin voi generoida komennolla:
 poetry run invoke coverage-report
 ```
 
-Raportti generoituu _htmlcov_-hakemistoon.
+Raportti generoituu htmlcov-hakemistoon.

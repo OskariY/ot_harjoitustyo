@@ -14,13 +14,14 @@ from entities.caveworm import Worm
 
 class World():
     """
-    Generates chunks, handles world edit and related variables
+    Handles all variables and functions relating to world generation and world editing (i.e.
+    breaking and placing tiles)
     """
     def __init__(self):
         # modifiers for how fast the algorythm goes through the noise pattern
         self.noise_speed = 0.05
-        self.cave_noise_speed = 0.07
-        self.cave_noise_multiplier = 30
+        self.cave_noise_speed = 0.05
+        self.cave_noise_multiplier = 20
 
         # game map, format: { "x;y": [[[tilex, tiley], tiletype], [[tilex, tiley], tiletype]] }
         # x;y are chunk (8*8 tiles) coordinates, the chunk is a list containing tiles, which
@@ -48,6 +49,9 @@ class World():
         self.drops = []
 
     def update(self, player):
+        """
+        Updates attributes of the world like scroll and the current biome
+        """
         # smoothly scroll camera towards the player
         self.scrollx += round((player.rect.centerx-self.scrollx-DISPLAY_WIDTH//2) / 20)
         self.scrolly += round((player.rect.centery-self.scrolly-DISPLAY_HEIGHT//2) / 20)
@@ -55,6 +59,10 @@ class World():
         self.current_biome = self.get_biome((player.rect.x, player.rect.y))
 
     def generate_world(self, display, player): # pragma: no cover
+        """
+        Fills the screen with chunks by either generation new chunks or pulling generated ones
+        from game map. Also spawns mobs and draws the tiles.
+        """
         # clear lists affected by the world generation loop
 
         self.tiles = []
@@ -155,10 +163,10 @@ class World():
         """
 
         # variation in the height differences through an other noise map
-        noise_multiplier = (noise.pnoise1((x + self.seed) * 0.01, 
+        noise_multiplier = (noise.pnoise1((x + self.seed) * 0.01,
                             repeat=99999999) + 1) * 20
         # heat map for biome generation
-        heat_map = int(round(noise.pnoise1((x + self.seed) * 0.01, 
+        heat_map = int(round(noise.pnoise1((x + self.seed) * 0.01,
                              repeat=99999999) * noise_multiplier))
         # setting biome based on heat map
         # 1: Forest, 2: Tundra, 3: Underground
@@ -174,14 +182,21 @@ class World():
                 target_y = y * CHUNK_SIZE + y_pos
                 tile_type = 0
 
-                plant_map = noise.pnoise1((target_x + self.seed) * 0.4, 
-                                           repeat=99999999, persistence=2) * noise_multiplier
+                plant_map = noise.pnoise1((target_x + self.seed) * 0.4,
+                                           repeat=99999999) * noise_multiplier
                 caveheight = int(round(noise.pnoise2((target_x + self.seed) * self.cave_noise_speed, 
-                                                     (target_y) * self.cave_noise_speed, 
-                                                     repeatx=99999999, repeaty=99999999
+                                                     (target_y) * self.cave_noise_speed,
+                                                     repeatx=99999999, repeaty=99999999,
+                                                     octaves=1,
+                                                     persistence=0.5,
+                                                     lacunarity=1
                                                      ) * self.cave_noise_multiplier))
-                height = int(round(noise.pnoise1((target_x + self.seed) * self.noise_speed, 
-                                                 repeat=99999999) * noise_multiplier))
+                height = int(round(noise.pnoise1((target_x + self.seed) * self.noise_speed,
+                                                 repeat=99999999,
+                                                 octaves=3,
+                                                 persistence=0.2,
+                                                 lacunarity=1
+                                                 ) * noise_multiplier))
 
                 # cave generation
                 if target_y > 29 - height:
@@ -447,6 +462,13 @@ class World():
                                 pygame.draw.rect(display, color, tilerect, 1)
 
     def get_biome(self, pos):
+        """
+        Gets and returns the biome of a chunk based on coordinates
+        Args:
+            pos
+        Returns:
+            int (biome)
+        """
         for chunk, chunkdata in self.game_map.items():
             chunkx, chunky = chunk.split(";")
             chunkx = int(chunkx) * TILE_SIZE * CHUNK_SIZE
