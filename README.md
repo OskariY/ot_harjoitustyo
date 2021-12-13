@@ -41,7 +41,7 @@ poetry run invoke start
 ```
 
 ### Käyttöohje
-[Käyttöohje](https://github.com/yoskari/ot_harjoitustyo/blob/main/dokumentaatio/arkkitehtuuri.md)
+[Käyttöohje](https://github.com/yoskari/ot_harjoitustyo/blob/main/dokumentaatio/manual.md)
 
 ### Testaus
 

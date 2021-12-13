@@ -401,9 +401,9 @@ def main(world_name):
         print_text(f"FPS: {int(clock.get_fps())}", 1, 0, display, 0, 10, fps_color)
         if chunk_debug_enabled:
             chunk_debug(truemousepos, display, world)
-            print_text(f"current_biome: {biomename}", 1, 10, display, 0, 10, fps_color)
+            print_text(f"Current biome: {biomename}", 1, 10, display, 0, 10, fps_color)
             print_text(f"X: {player.rect.x} Y: {player.rect.y}", 1, 20, display, 0, 10, fps_color)
-            print_text(f"seed: {world.seed}", 1, 30, display, 0, 10, fps_color)
+            print_text(f"Seed: {world.seed}", 1, 30, display, 0, 10, fps_color)
 
         # draw display surface onto screen, update it and clock the fps
         screen.blit(pygame.transform.scale(display, (WINDOW_WIDTH, WINDOW_HEIGHT)), (0, 0))

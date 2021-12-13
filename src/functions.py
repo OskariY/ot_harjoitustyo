@@ -105,7 +105,7 @@ def chunk_debug(pos, display, world): # pragma: no cover
             chunkrect.y -= world.scrolly
             pygame.draw.rect(display, RED, chunkrect, 1)
 
-def draw_health_bar(health_x, health_y, display, health, max_health):
+def draw_health_bar(health_x, health_y, display, health, max_health): # pragma: no cover
     """
     Draws a health bar showing health in green and lost health in red
     Args:
