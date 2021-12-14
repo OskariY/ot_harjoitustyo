@@ -10,6 +10,9 @@
     * save_functions.py
     * resources.py
     * settings.py
+* resources/
+    * images/
+    * music/
 
 ## main
 Peliohjelmoinnille tyypillisellä tavalla main loop pyörii pelin aloitettua jatkuvasti,
