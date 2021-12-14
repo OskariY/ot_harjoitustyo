@@ -40,8 +40,13 @@ from world import World
 from menus.pause import pause
 from menus.startmenu import startmenu
 from save_functions import load_game, create_world
+from console import Console
 
 def main(world_name):
+    console = Console(WINDOW_WIDTH // 4, 0, WINDOW_WIDTH // 2,
+                      WINDOW_HEIGHT // 3, 24)
+    console.log("Logger started")
+
     # load game data from save file
     game_data = load_game(world_name)
 
@@ -56,13 +61,11 @@ def main(world_name):
         inventory.add_to_inventory("axe", 1)
         inventory.add_to_inventory("pickaxe", 1)
         inventory.add_to_inventory("shovel", 1)
-        inventory.add_to_inventory("plank", 100)
-        inventory.add_to_inventory("meat", 10)
     else:
         inventory.inventory = game_data["inventory"]
 
     # world object
-    world = World()
+    world = World(console)
 
     # load world related variables from the save
     world.game_map = game_data["game_map"]
@@ -88,15 +91,6 @@ def main(world_name):
     tile_hits_left = 10
 
     chunk_debug_enabled = False
-    help_dismissed = True
-    help_text = ["WASD: move and jump",
-                 "Mouse1: break block with tools",
-                 "Mouse2: place block",
-                 "1-5: select hotbar items",
-                 "TAB: open/close inventory",
-                 "ESC: open/close pause menu",
-                 "",
-                 "press h to open/close help"]
 
     # game loop
     while True:
@@ -120,64 +114,80 @@ def main(world_name):
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.KEYDOWN:
-            # movement
-                # move right
-                if event.key == pygame.K_d:
-                    player.moving_right = True
-                    player.invert = 0
-                # move left
-                if event.key == pygame.K_a:
-                    player.moving_left = True
-                    player.invert = 1
-                # fall (used for slabs)
-                if event.key == pygame.K_s:
-                    player.falling = True
-                # jump
-                if event.key == pygame.K_w and player.jumps > 0: # jump
-                    player.dy = -player.jump_power
-                    player.jumps -= 1
-                    jump_sound.play()
-            # open inventory
-                if event.key == pygame.K_TAB:
-                    if inv_open == False:
-                        inv_open = True
+                if event.key == pygame.K_F1:
+                    console.show = not console.show
+                    if console.show == True:
+                        console.focused = True
                     else:
-                        inv_open = False
-                # equip items in the hotbar
-                if event.key == pygame.K_1:
-                    inventory.equip_item(0)
-                if event.key == pygame.K_2:
-                    inventory.equip_item(1)
-                if event.key == pygame.K_3:
-                    inventory.equip_item(2)
-                if event.key == pygame.K_4:
-                    inventory.equip_item(3)
-                if event.key == pygame.K_5:
-                    inventory.equip_item(4)
-                if event.key == pygame.K_F8:
-                    player.rect.y += 1000
-                if event.key == pygame.K_F9:
-                    create_world("test")
-                    main("test")
-                if event.key == pygame.K_h:
-                    if help_dismissed:
-                        help_dismissed = False
+                        console.focused = False
+                    console.offset = 0
+
+                if console.focused:
+                    if event.key == pygame.K_RETURN:
+                        console.command(inventory, world, player)
+                    elif event.key == pygame.K_BACKSPACE:
+                        console.cmdbuffer = console.cmdbuffer[:-1]
                     else:
-                        help_dismissed = True
-                if event.key == pygame.K_F3:
-                    if chunk_debug_enabled:
-                        chunk_debug_enabled = False
-                    else:
-                        chunk_debug_enabled = True
-                if event.key == pygame.K_ESCAPE:
-                    world_name = pause(display, screen, clock, world, inventory, player, world_name)
-                    if world_name:
-                        main(world_name)
-            if event.type == pygame.KEYUP:
+                        console.cmdbuffer += event.unicode
+
+                else:
+                    # move right
                     if event.key == pygame.K_d:
-                        player.moving_right = False
+                        player.moving_right = True
+                        player.invert = 0
+                    # move left
                     if event.key == pygame.K_a:
-                        player.moving_left = False
+                        player.moving_left = True
+                        player.invert = 1
+                    # fall (used for slabs)
+                    if event.key == pygame.K_s:
+                        player.falling = True
+                    # jump
+                    if event.key == pygame.K_w and player.jumps > 0: # jump
+                        player.dy = -player.jump_power
+                        player.jumps -= 1
+                        jump_sound.play()
+                # open inventory
+                    if event.key == pygame.K_TAB:
+                        if inv_open is False:
+                            inv_open = True
+                        else:
+                            inv_open = False
+                    # equip items in the hotbar
+                    if event.key == pygame.K_1:
+                        inventory.equip_item(0)
+                    if event.key == pygame.K_2:
+                        inventory.equip_item(1)
+                    if event.key == pygame.K_3:
+                        inventory.equip_item(2)
+                    if event.key == pygame.K_4:
+                        inventory.equip_item(3)
+                    if event.key == pygame.K_5:
+                        inventory.equip_item(4)
+                    if event.key == pygame.K_F8:
+                        player.rect.y += 1000
+                    if event.key == pygame.K_F9:
+                        create_world("test")
+                        main("test")
+                    if event.key == pygame.K_F3:
+                        if chunk_debug_enabled:
+                            chunk_debug_enabled = False
+                        else:
+                            chunk_debug_enabled = True
+                    if console.show:
+                        if event.key == pygame.K_k:
+                            console.offset -= 50
+                        if event.key == pygame.K_j:
+                            console.offset += 50
+                    if event.key == pygame.K_ESCAPE:
+                        world_name = pause(display, screen, clock, world, inventory, player, world_name)
+                        if world_name:
+                            main(world_name)
+            if event.type == pygame.KEYUP:
+                if event.key == pygame.K_d:
+                    player.moving_right = False
+                if event.key == pygame.K_a:
+                    player.moving_left = False
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 # inventory mouse controls
@@ -202,7 +212,7 @@ def main(world_name):
                                 break
 
                         # crafting pagination
-                        if inventory.crafting_back_button.collidepoint((mousepos[0] - inventory.invx, 
+                        if inventory.crafting_back_button.collidepoint((mousepos[0] - inventory.invx,
                                                                         mousepos[1] - inventory.invy)):
                             if inventory.crafting_index_1 > 0:
                                 if inventory.crafting_index_1 - 6 > 0:
@@ -211,7 +221,7 @@ def main(world_name):
                                 else:
                                     inventory.crafting_index_1 = 0
                                     inventory.crafting_index_2 = 6
-                        if inventory.crafting_next_button.collidepoint((mousepos[0] - inventory.invx, 
+                        if inventory.crafting_next_button.collidepoint((mousepos[0] - inventory.invx,
                                                                         mousepos[1] - inventory.invy)):
                             craftables = len(list(CRAFTING_REQUIREMENTS.keys()))
                             if inventory.crafting_index_2 < craftables:
@@ -223,9 +233,9 @@ def main(world_name):
                                     inventory.crafting_index_1 = craftables - 6
 
                         # crafting button
-                        if inventory.crafting_item_selected != None:
+                        if inventory.crafting_item_selected is not None:
                             if inventory.crafting_item_selected < len(inventory.visible_crafting_items):
-                                if inventory.crafting_button.collidepoint((mousepos[0] - inventory.invx, 
+                                if inventory.crafting_button.collidepoint((mousepos[0] - inventory.invx,
                                                                            mousepos[1] - inventory.invy)):
                                     have_requirements = True
                                     for requirement in CRAFTING_REQUIREMENTS[inventory.visible_crafting_items[inventory.crafting_item_selected]]:
@@ -240,7 +250,7 @@ def main(world_name):
                 # regular mouse countrols
                 else:
                     if event.button == 1:
-                        if inventory.equipped != "" and inventory.equipped != None:
+                        if inventory.equipped != "" and inventory.equipped is not None:
                             # if item is food, heal player
                             if ITEMS[inventory.equipped]["food"] and player.health < player.max_health:
                                 if player.health + ITEMS[inventory.equipped]["heal"] > player.max_health:
@@ -249,7 +259,7 @@ def main(world_name):
                                     player.health += ITEMS[inventory.equipped]["heal"]
                                 world.popups.append(FadingText(player.rect.centerx,
                                                     player.rect.top,
-                                                    "+{} HP".format(str(ITEMS[inventory.equipped]["heal"])), 
+                                                    "+{} HP".format(str(ITEMS[inventory.equipped]["heal"])),
                                                     world.current_biome,
                                                     GRASSGREEN
                                                     ))
@@ -262,7 +272,7 @@ def main(world_name):
                                 if selected_tile != breaking_tile:
                                     selected_tile = breaking_tile
                                     tile_hits_left = 10
-                                if breaking_tile != None:
+                                if breaking_tile is not None:
                                     # reduce tile_hits_left based on the tool and the tile
                                     if inventory.equipped == "pickaxe" and breaking_tile[1] in ["stone", "coal block"]:
                                         if breaking_tile[1] == "stone":
@@ -305,7 +315,7 @@ def main(world_name):
                         if inventory.equipped != "":
                             # place tiles
                             if ITEMS[inventory.equipped]["build"] and inventory.in_inventory(inventory.equipped):
-                                if world.get_next_tiles(truemousepos) == True:
+                                if world.get_next_tiles(truemousepos) is True:
                                     world.place_tile(truemousepos,
                                                      inventory.equipped,
                                                      inventory,
@@ -328,9 +338,9 @@ def main(world_name):
                 # inventory mouse controls
                 if inv_open:
                     if event.button == 1:
-                       # loop through the inventory grid and test for collisions
-                       # if mouse collides with an inventory slot call the inventory drag function
-                       for i, item in enumerate(inventory.inventory):
+                        # loop through the inventory grid and test for collisions
+                        # if mouse collides with an inventory slot call the inventory drag function
+                        for i, item in enumerate(inventory.inventory):
                             testrect = item[0].copy()
                             testrect.x += inventory.invx
                             testrect.y += inventory.invy
@@ -339,7 +349,8 @@ def main(world_name):
                                 inventory.inventory_drag()
                                 inventory.inv_select1 = -1
                                 inventory.inv_select2 = -1
-
+            if event.type == pygame.MOUSEMOTION:
+                console.update()
         # drawing and updating game entities like the player
         player.draw(display, world.scrollx, world.scrolly)
         player.update(inventory, world)
@@ -385,18 +396,10 @@ def main(world_name):
         else:
             biomename = world.current_biome
 
-        if not help_dismissed:
-            help_x = CENTER[0] - 96
-            help_y = CENTER[1] - 64
-            print_text("Controls:", CENTER[0], help_y - 20, display, 1, 18)
-            for t in help_text:
-                print_text(t, help_x, help_y, display, 0, 18)
-                help_y += 18
+        if world.current_biome == 3:
+            fps_color = WHITE
         else:
-            if world.current_biome == 3:
-                fps_color = WHITE
-            else:
-                fps_color = BLACK
+            fps_color = BLACK
 
         print_text(f"FPS: {int(clock.get_fps())}", 1, 0, display, 0, 10, fps_color)
         if chunk_debug_enabled:
@@ -405,8 +408,10 @@ def main(world_name):
             print_text(f"X: {player.rect.x} Y: {player.rect.y}", 1, 20, display, 0, 10, fps_color)
             print_text(f"Seed: {world.seed}", 1, 30, display, 0, 10, fps_color)
 
+
         # draw display surface onto screen, update it and clock the fps
         screen.blit(pygame.transform.scale(display, (WINDOW_WIDTH, WINDOW_HEIGHT)), (0, 0))
+        console.draw(screen)
         pygame.display.update()
         clock.tick(FPS)
 
@@ -414,9 +419,5 @@ if __name__ == "__main__":
     # if MUSIC setting is True, play music indefinately
     if MUSIC:
         pygame.mixer.music.play(-1)
-    if "--debugrun" in sys.argv:
-        create_world("test")
-        world_name = "test"
-    else:
-        world_name = startmenu(display, screen, clock)
+    world_name = startmenu(display, screen, clock)
     main(world_name)

@@ -11,7 +11,7 @@ Northlands on 2D seikkailupeli, jossa pelaaja seikkailee satunnaisesti generoidu
 Peli on kirjoitettu Pythonilla ja toteutettu käyttäen pygame-grafiikkakirjastoa sekä yksi- ja kaksiulotteista noise-algorytmia maailman generoimiseen.
 
 ## Lisenssi
-[GNU General Public License](https://opensource.org/licenses/GPL-3.0)
+[GNU General Public License](https://github.com/yoskari/ot_harjoitustyo/blob/main/LICENSE)
 
 ## Linkit:
 

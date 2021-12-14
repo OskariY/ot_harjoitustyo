@@ -16,4 +16,6 @@
 | 09.12 | 4    | testejä ja bugin korjaamista |
 | 10.12 | 2    | poistin vahingossa kotihakemiston, edellisen päivän työn palauttamista ja uudelleentekemistä |
 | 12.12 | 2    | bugien korjausta ja dokumentointia |
-| yht   | 54   | |
+| 13.12 | 2    | pelin sisäisen konsolin luominen |
+| 14.12 | 3    | dokumentaation kirjoittamista ja bugien korjausta |
+| yht   | 59   | |

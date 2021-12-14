@@ -6,6 +6,7 @@ screen = pygame.display.set_mode((400, 300))
 
 from functions import move
 from world import World
+from console import Console
 class TestMove(unittest.TestCase):
     class TestObject():
         def __init__(self):
@@ -16,7 +17,7 @@ class TestMove(unittest.TestCase):
 
     def setUp(self):
         self.obj = self.TestObject()
-        self.world = World()
+        self.world = World(Console(0, 0, 10, 10, 10))
         # usually created in the world generation process
         self.world.tiles = []
         self.world.slabs = []

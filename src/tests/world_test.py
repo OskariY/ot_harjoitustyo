@@ -5,10 +5,11 @@ from world import World
 from inventory import Inventory
 from entities.player import Player
 from settings import TILE_SIZE
+from console import Console
 
 class TestWorld(unittest.TestCase):
     def setUp(self):
-        self.world = World()
+        self.world = World(Console(10, 10, 10, 10, 10))
         self.inventory = Inventory()
         self.inventory.add_to_inventory("dirt", 100)
         self.inventory.equip_item(0)

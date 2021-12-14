@@ -29,6 +29,8 @@ ESCAPE: avaa/sulje pause valikko
 
 Numerot 1-5: valitse esine hotbarissa
 
+F1: Avaa konsoli
+
 F3: chunk debug näkymä, näyttää mm. chunkkien ja palikkojen rajat, koordinaatit ja nykyisen biomin
 
 F9: luo ja lataa maailman "test", hyödyllinen maailman generoinnin testaamiseen

@@ -20,7 +20,7 @@ class MenuWorldSave():
         self.selected = False
 
     def draw(self, surf):
-        if self.selected == True:
+        if self.selected is True:
             color = WHITE
         else:
             color = BLACK
@@ -30,7 +30,6 @@ class MenuWorldSave():
 
 def startmenu(display, screen, clock):
     WINDOW_WIDTH, WINDOW_HEIGHT = screen.get_size()
-    world = World()
     # main menu buttons
     start_game = pygame.Rect(DISPLAY_WIDTH // 2 - 64, DISPLAY_HEIGHT // 2 - 32, 128, 32)
     exit_game = pygame.Rect(DISPLAY_WIDTH // 2 - 64, DISPLAY_HEIGHT // 2 + 8, 128, 32)
@@ -95,7 +94,7 @@ def startmenu(display, screen, clock):
                             # create world
                             create_world_screen = 2
 
-                        if selected_world != None:
+                        if selected_world is not None:
                             if play_button.collidepoint((mousex, mousey)):
                                 return selected_world
                             if remove_world.collidepoint((mousex, mousey)):
@@ -106,8 +105,9 @@ def startmenu(display, screen, clock):
                                 selected_world = None
 
                         for save in saved_worlds:
-                            if save.rect.collidepoint((mousex-world_surf_rect.x, mousey-world_surf_rect.y)):
-                                if save.selected == True:
+                            if save.rect.collidepoint((mousex-world_surf_rect.x,
+                                                       mousey-world_surf_rect.y)):
+                                if save.selected is True:
                                     save.selected = False
                                     selected_world = None
                                 else:
@@ -139,7 +139,8 @@ def startmenu(display, screen, clock):
                 for save in saved_worlds:
                     save.rect.y += event.y * 3
 
-        display.blit(pygame.transform.scale(background_image, (DISPLAY_WIDTH, DISPLAY_HEIGHT)), (0, 0))
+        display.blit(pygame.transform.scale(background_image,
+                                            (DISPLAY_WIDTH, DISPLAY_HEIGHT)), (0, 0))
         # for particle in particles:
         #     particle.update(display, particles)
 
@@ -173,7 +174,8 @@ def startmenu(display, screen, clock):
                 else:
                     pygame.draw.rect(display, BLACK, play_button, 1)
                     play_button_text = BLACK
-                print_text("Play", play_button.centerx, play_button.centery-8, display, 1, 16, play_button_text)
+                print_text("Play", play_button.centerx, play_button.centery-8,
+                           display, 1, 16, play_button_text)
 
                 pygame.draw.rect(display, GRAY, remove_world)
                 if remove_world.collidepoint((mousex, mousey)):
@@ -182,13 +184,17 @@ def startmenu(display, screen, clock):
                 else:
                     pygame.draw.rect(display, BLACK, remove_world, 1)
                     remove_world_text = BLACK
-                print_text("Remove World", remove_world.centerx, remove_world.centery-8, display, 1, 16, remove_world_text)
+                print_text("Remove World", remove_world.centerx, remove_world.centery-8,
+                           display, 1, 16, remove_world_text)
 
             for save in saved_worlds:
                 save.draw(world_surf)
-            print_text("Back to Menu", back_to_menu.centerx, back_to_menu.centery-8, display, 1, 16, back_text)
-            print_text("Create New World", create_new_world.centerx, create_new_world.centery-8, display, 1, 16, new_world_text)
-            print_text("Worlds", world_surf_rect.centerx, world_surf_rect.y-16, display, 1, 16, BLACK)
+            print_text("Back to Menu", back_to_menu.centerx, back_to_menu.centery-8,
+                       display, 1, 16, back_text)
+            print_text("Create New World", create_new_world.centerx, create_new_world.centery-8,
+                       display, 1, 16, new_world_text)
+            print_text("Worlds", world_surf_rect.centerx, world_surf_rect.y-16,
+                       display, 1, 16, BLACK)
 
         elif create_world_screen == 2:
             pygame.draw.rect(display, GRAY, new_world_rect)
@@ -209,10 +215,14 @@ def startmenu(display, screen, clock):
                 create_text = BLACK
 
 
-            print_text("Type world name:", new_world_rect.centerx, new_world_rect.y, display, 1, 16, BLACK)
-            print_text(new_world_name, new_world_rect.centerx, new_world_rect.centery-8, display, 1, 16, BLACK)
-            print_text("Back", new_world_back.centerx, new_world_back.centery-8, display, 1, 16, back_text)
-            print_text("Create", new_world_create.centerx, new_world_create.centery-8, display, 1, 16, create_text)
+            print_text("Type world name:", new_world_rect.centerx, new_world_rect.y,
+                       display, 1, 16, BLACK)
+            print_text(new_world_name, new_world_rect.centerx, new_world_rect.centery-8,
+                       display, 1, 16, BLACK)
+            print_text("Back", new_world_back.centerx, new_world_back.centery-8,
+                       display, 1, 16, back_text)
+            print_text("Create", new_world_create.centerx, new_world_create.centery-8,
+                       display, 1, 16, create_text)
 
         # main menu
         else:
@@ -235,8 +245,10 @@ def startmenu(display, screen, clock):
 
             print_text("The Northlands", CENTER[0], 32, display, 1, 48, BLACK)
             print_text("The Northlands", CENTER[0]+2, 32, display, 1, 48, WHITE)
-            print_text("Start Game", start_game.centerx, start_game.centery-8, display, 1, 16, start_text)
-            print_text("Exit Game", exit_game.centerx, exit_game.centery-8, display, 1, 16, exit_text)
+            print_text("Start Game", start_game.centerx, start_game.centery-8,
+                       display, 1, 16, start_text)
+            print_text("Exit Game", exit_game.centerx, exit_game.centery-8,
+                       display, 1, 16, exit_text)
             print_text("By: Oskari Ylönen", 0, DISPLAY_HEIGHT-16, display, 0, 16, BLACK)
 
         screen.blit(pygame.transform.scale(display, (WINDOW_WIDTH, WINDOW_HEIGHT)), (0, 0))

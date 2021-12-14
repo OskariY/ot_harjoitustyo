@@ -17,7 +17,10 @@ class World():
     Handles all variables and functions relating to world generation and world editing (i.e.
     breaking and placing tiles)
     """
-    def __init__(self):
+    def __init__(self, console):
+        self.console = console
+        self.console.log("World class initialized")
+
         # modifiers for how fast the algorythm goes through the noise pattern
         self.noise_speed = 0.05
         self.cave_noise_speed = 0.05
@@ -184,7 +187,7 @@ class World():
 
                 plant_map = noise.pnoise1((target_x + self.seed) * 0.4,
                                            repeat=99999999) * noise_multiplier
-                caveheight = int(round(noise.pnoise2((target_x + self.seed) * self.cave_noise_speed, 
+                caveheight = int(round(noise.pnoise2((target_x + self.seed) * self.cave_noise_speed,
                                                      (target_y) * self.cave_noise_speed,
                                                      repeatx=99999999, repeaty=99999999,
                                                      octaves=1,
@@ -235,6 +238,7 @@ class World():
                                 tile_type = "tree4"
                 if tile_type != 0:
                     chunk_data[0].append([[target_x,target_y],tile_type])
+        self.console.log(f"Generated chunk: {x};{y}, biome: {chunk_data[1]}, heat map: {heat_map}, noise multiplier: {int(noise_multiplier)}, tiles: {len(chunk_data[0])}")
         return chunk_data
 
     def get_next_tiles(self, pos):
@@ -271,19 +275,20 @@ class World():
         if abs(posx - player.rect.centerx) < 5*TILE_SIZE or nodistance and abs(posy - player.rect.centery) < 5*TILE_SIZE or nodistance:
             # get chunk
             chunk = self.get_chunk(pos)
-            if chunk != None:
+            if chunk is not None:
                 # loop throught tile in the chunk
                 for tile in self.game_map[chunk][0]:
                     tilerect = pygame.Rect(tile[0][0]*TILE_SIZE, tile[0][1]*TILE_SIZE, TILE_SIZE, TILE_SIZE)
                     # if a tile exists at pos remove it
                     if tilerect.collidepoint(posx, posy):
                         self.game_map[chunk][0].remove(tile)
+                        self.console.log(f"{tile[1]} removed at {tile[0][1]},{tile[0][1]}")
                         # spawn drops if the nodrops flag isn't enabled
                         if not nodrops:
                             if tilerect in self.tiles:
                                 self.tiles.remove(tilerect)
 
-                            drop_name = tile[1] 
+                            drop_name = tile[1]
                             drop_amount = 1
                             # handle exceptions for drops and otherwise just drop the item
                             if tile[1] in ["dirt", "grass", "snowy grass"]:
@@ -363,13 +368,13 @@ class World():
 
         targettile = self.get_tile(pos)
         furniture = False
-        if targettile != None:
+        if targettile is not None:
             # if the target tile is a plant, just remove it and place the tile
             if targettile[1] == "plant":
                 self.remove_tile(pos, player)
             # if the target tile is furniture e.g. a wall, torches and other stuff
             # can be placed on it
-            elif ITEMS[targettile[1]]["furniture"] == True:
+            elif ITEMS[targettile[1]]["furniture"] is True:
                 furniture = True
             # if a tile already exists in the target location, do nothing
             else:
@@ -393,6 +398,7 @@ class World():
                                                 target_y // TILE_SIZE):
                             if not tilerect.colliderect(player.rect) or furniture is True:
                                 self.game_map[chunk][0].append(target_block)
+                                self.console.log(f"{blocktype} placed at {target_block[0][0]}, {target_block[0][1]}")
                                 build_sound.play()
                                 if item_cost:
                                     inventory.remove_item(inventory.equipped, 1)
@@ -405,6 +411,7 @@ class World():
                                     if inventory.equipped != blockname:
                                         if blockname == "plank wall":
                                             self.game_map[chunk][0].append(target_block)
+                                            self.console.log(f"{blocktype} placed on {blockname} at {target_block[0][0]}, {target_block[0][1]}")
                                             build_sound.play()
                                             if item_cost:
                                                 inventory.remove_item(inventory.equipped, 1)
@@ -437,7 +444,7 @@ class World():
         if abs(posx - player.rect.centerx) < 5*TILE_SIZE and abs(posy - player.rect.centery) < 5*TILE_SIZE and equipped != "":
             if ITEMS[equipped]["tool"]:
                 tile = self.get_tile(pos)
-                if tile != None:
+                if tile is not None:
                     color = BLACK
                     drawrect = pygame.Rect(tile[0][0]*TILE_SIZE-self.scrollx, tile[0][1]*TILE_SIZE-self.scrolly, TILE_SIZE, TILE_SIZE)
                     if self.current_biome == 3:

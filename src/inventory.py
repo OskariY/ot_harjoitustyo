@@ -102,7 +102,7 @@ class Inventory():
                     y = 2
                     x += self.crafting_window.width // 2
 
-            if self.crafting_item_selected != None:
+            if self.crafting_item_selected is not None:
                 pygame.draw.rect(self.surface, WHITE, self.crafting_item_rect, 1)
                 if self.crafting_item_selected < len(self.visible_crafting_items):
                     x = self.crafting_window.x
@@ -176,7 +176,7 @@ class Inventory():
                 break
         if not item_in_inventory:
             for squere in self.inventory:
-                if squere[1] == "" or squere[1] == None:
+                if squere[1] == "" or squere[1] is None:
                     squere[1] = item
                     if amount > ITEMS[item]["stack"]:
                         squere[2] = ITEMS[item]["stack"]

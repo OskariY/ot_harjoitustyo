@@ -1,7 +1,7 @@
 import math
 import random
 import pygame
-from settings import TILE_SIZE, GREEN, RED
+from settings import TILE_SIZE, RED
 from entities.particle import Particle
 from entities.drop import DroppedItem
 from resources import worm_head, worm_body, worm_tail
@@ -75,7 +75,7 @@ class Worm():
                     self.aggroed = False
                     self.target = None
 
-            if self.target != None:
+            if self.target is not None:
                 # head movement
                 distance_x = self.target.rect.x - self.head_rect.x
                 distance_y = self.target.rect.y - self.head_rect.y

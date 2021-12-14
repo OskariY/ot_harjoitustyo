@@ -1,6 +1,6 @@
 import math
 import pygame
-from settings import TILE_SIZE, GREEN, RED
+from settings import TILE_SIZE
 from resources import player_images, ITEMS, hurt_sound, death_sound
 from entities.fadingtext import FadingText
 from functions import move, draw_health_bar
@@ -160,7 +160,7 @@ class Player():
             self.health = self.max_health
 
         # gravity and falling
-        if self.collisions["down"] == False: # gravity
+        if self.collisions["down"] is False: # gravity
             if self.dy < self.max_gravity:
                 self.dy += self.gravity
 

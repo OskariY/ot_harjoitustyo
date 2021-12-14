@@ -28,7 +28,10 @@ class DroppedItem():
         """
         # only update movement if drop is in the screen
         # prevents them from falling off the map
-        if self.rect.x - world.scrollx > 0 and self.rect.x - world.scrollx < DISPLAY_WIDTH and self.rect.y - world.scrolly > 0 and self.rect.y - world.scrolly < DISPLAY_HEIGHT:
+        if self.rect.x - world.scrollx > 0 \
+                and self.rect.x - world.scrollx < DISPLAY_WIDTH \
+                and self.rect.y - world.scrolly > 0 \
+                and self.rect.y - world.scrolly < DISPLAY_HEIGHT:
             move(self, world)
             self.dy += self.gravity
             if self.collisions["down"]:
@@ -43,4 +46,3 @@ class DroppedItem():
         Draws the drop
         """
         display.blit(self.image, (self.rect.x - scrollx, self.rect.y - scrolly))
-

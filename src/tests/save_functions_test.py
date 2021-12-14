@@ -7,10 +7,11 @@ from entities.player import Player
 from entities.walkingmob import WalkingMob
 from entities.caveworm import Worm
 from save_functions import *
+from console import Console
 
 class TestSaveFunctions(unittest.TestCase):
     def setUp(self):
-        self.world = World()
+        self.world = World(Console(10, 10, 10, 10, 10))
         self.inventory = Inventory()
         self.player = Player(0, 0)
 

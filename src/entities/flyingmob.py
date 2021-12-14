@@ -39,7 +39,8 @@ class FlyingMob():
         if self.health <= 0:
             for i in range(50):
                 world.particles.append(Particle(self.rect.centerx, self.rect.centery, RED))
-            world.drops.append(DroppedItem(self.rect.centerx, self.rect.centery, self.dx, self.dy, "meat"))
+            world.drops.append(DroppedItem(self.rect.centerx, self.rect.centery,
+                                           self.dx, self.dy, "meat"))
             world.mobs.remove(self)
             world.entities.remove(self)
 
@@ -74,7 +75,7 @@ class FlyingMob():
                 self.dy -= 0.2
 
         if self.collisions["left"] or self.collisions["right"] and self.dx > -self.speed:
-             self.dy -= 0.4
+            self.dy -= 0.4
 
         if self.dx > self.max_speed:
             self.dx = self.max_speed
