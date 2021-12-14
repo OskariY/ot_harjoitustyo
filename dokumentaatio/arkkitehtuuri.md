@@ -23,6 +23,7 @@ World luokka vastaa maailman säilytyksestä, generoinnista ja muokkaamisesta. E
 - `generate_chunk()`
 - `remove_tile()`
 - `place_tile()`
+
 Esimerkki place_tile()-metodin logiikasta:
 ![place a tile](https://www.websequencediagrams.com/cgi-bin/cdraw?lz=dGl0bGUgcGxhY2UgYSB0aWxlCm1haW4oKS0-ZXZlbnQgbG9vcDogcmlnaHQgY2xpY2sKAA4KLT5JbnZlbnRvcnk6IGdldF9uZXh0X3RpbGVzKCkKABMJAD0OVHJ1ZQAsGACBAwUAPAUAMg5Xb3JsZDogaXMAgR0FAIEpBm1lbnQgdmFsaWQ_CgAbBQCBAQ1ZZXMALhN1cGRhdGUgZ2FtZV9tYXA&s=default)
 
@@ -51,17 +52,17 @@ Maailma tallennetaan dictionary-muodossa pickle tiedostoon.
 
 ## Asetukset / konfiguraatio
 Muutettavaksi tarkoitetut asetukset luetaan projektin juurihakemistossa sijaitsevasta
-config.json tiedostosta. Muut asetukset on koodattu settings.py-tiedostoon. Tämä mahdollistaa
+`config.json`-tiedostosta. Muut asetukset on koodattu `settings.py`-tiedostoon. Tämä mahdollistaa
 graafisen käyttöliittymän luomisen asetuksia varten tulevaisuudessa.
 
 ## Resurssit
 Pelin käyttämät kuvat ja äänitiedostot sijaitsevat projektin juurihakemiston alta löytyvästä
-resources hakemistosta. Ne ladataan koodissa resources.py-tiedostossa.
+resources hakemistosta. Ne ladataan koodissa `resources.py`-tiedostossa.
 
 ## Käyttöliittymä
 Ylipäätänsä käyttöliittymä on eroteltu sovelluslogiikasta ennen kaikkea funktiotasolla.
 Kaikki sovelluslogiikan kannalta olennaiset luokat ja funktiot on mahdollista yksikkötestata.
 
-Luokkien suhdetta kuvaava luokkakaavio:
-![luokkakaavio](https://yuml.me/2b87d31b.png)
+### Luokkien suhdetta kuvaava luokkakaavio:
 
+![luokkakaavio](https://yuml.me/2b87d31b.png)
