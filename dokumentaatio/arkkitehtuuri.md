@@ -25,6 +25,7 @@ World luokka vastaa maailman säilytyksestä, generoinnista ja muokkaamisesta. E
 - `place_tile()`
 
 Esimerkki place_tile()-metodin logiikasta:
+
 ![place a tile](https://www.websequencediagrams.com/cgi-bin/cdraw?lz=dGl0bGUgcGxhY2UgYSB0aWxlCm1haW4oKS0-ZXZlbnQgbG9vcDogcmlnaHQgY2xpY2sKAA4KLT5JbnZlbnRvcnk6IGdldF9uZXh0X3RpbGVzKCkKABMJAD0OVHJ1ZQAsGACBAwUAPAUAMg5Xb3JsZDogaXMAgR0FAIEpBm1lbnQgdmFsaWQ_CgAbBQCBAQ1ZZXMALhN1cGRhdGUgZ2FtZV9tYXA&s=default)
 
 ## Inventory
