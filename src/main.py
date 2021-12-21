@@ -75,10 +75,10 @@ def main(world_name):
     world.seed = game_data["seed"]
     world.tod = game_data["tod"]
     for x, y, mobtype in game_data["mob_coords"]:
-        if mobtype == "bear":
-            mob = WalkingMob(x, y)
-        elif mobtype == "bird":
+        if mobtype == "bird":
             mob = FlyingMob(x, y)
+        else:
+            mob = WalkingMob(x, y, mobtype)
         world.mobs.append(mob)
         world.entities.append(mob)
 
@@ -95,6 +95,7 @@ def main(world_name):
     chunk_debug_enabled = False
 
     song_playing = 0 # index of the current song
+
 
     # game loop
     while True:
@@ -194,7 +195,8 @@ def main(world_name):
                         if event.key == pygame.K_j:
                             console.offset += 50
                     if event.key == pygame.K_ESCAPE:
-                        world_name = pause(display, screen, clock, world, inventory, player, world_name)
+                        world_name = pause(display, screen, clock, world, inventory,
+                                           player, world_name)
                         if world_name:
                             main(world_name)
             if event.type == pygame.KEYUP:
@@ -274,14 +276,14 @@ def main(world_name):
                                 world.popups.append(FadingText(player.rect.centerx,
                                                     player.rect.top,
                                                     "+{} HP".format(str(ITEMS[inventory.equipped]["heal"])),
-                                                    world.current_biome,
+                                                    world,
                                                     GRASSGREEN
                                                     ))
                                 inventory.remove_item(inventory.equipped, 1)
 
                             # tool logic
                             if ITEMS[inventory.equipped]["tool"] and inventory.in_inventory(inventory.equipped):
-                                player.hit(inventory.equipped, world, mousex, mousey)
+                                player.hit(world, mousex, mousey)
                                 breaking_tile = world.get_tile(truemousepos)
                                 if selected_tile != breaking_tile:
                                     selected_tile = breaking_tile
@@ -394,6 +396,10 @@ def main(world_name):
             worm.update(player, world)
             worm.draw(display, world.scrollx, world.scrolly)
 
+        if world.tod > 40000 or world.current_biome == 3:
+            for glowpos in world.glows:
+                display.blit(glow, glowpos, special_flags=pygame.BLEND_RGBA_ADD)
+
         # set time of day and draw appropriate lighting
         # 0-40000 = day, 40000-50000 = evening, 50000-90000 = night, 90000-100000
         world.tod += 10
@@ -413,9 +419,6 @@ def main(world_name):
             display.blit(darkness, (0, 0), special_flags=pygame.BLEND_RGBA_SUB)
         if world.tod >= 100000:
             world.tod = 0
-        if world.tod > 40000:
-            for glowpos in world.glows:
-                display.blit(glow, glowpos, special_flags=pygame.BLEND_RGBA_ADD)
 
         # draw inventory
         inventory.draw(inv_open, display, mousepos)
@@ -433,7 +436,7 @@ def main(world_name):
         else:
             biomename = world.current_biome
 
-        if world.current_biome == 3:
+        if world.current_biome == 3 or world.is_night:
             fps_color = WHITE
         else:
             fps_color = BLACK

@@ -19,7 +19,7 @@ Sovellus on 2D selviytymispeli, jossa pelaaja seikkailee neliöistä koostuvasta
 
 * Crafting järjestelmä (tehty)
 * Maailmojen tallentaminen ja lataaminen (tehty)
-* Vuorokausisykli
+* Vuorokausisykli (tehty)
 * Puiden ja mahdollisesti muiden kasvien kasvattaminen
 * Bossi
 * Lämpökartta (heat map), jonka perusteella luodaan erilaisia biomeita (tehty)

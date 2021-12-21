@@ -53,7 +53,7 @@ class Player():
         self.chopping_animation = 10
         self.chopping_rotation = 10
 
-    def hit(self, weapon, world, mousex, mousey):
+    def hit(self, world, mousex, mousey):
         """
         Invokes the chopping animation and "hits" towards the direction of the mouse
         by placing an invisible rectangle towards the mouse and checking for collisions
@@ -95,31 +95,8 @@ class Player():
                     hit = True
             if hit:
                 worm.health -= 5
-        # self.hitrect.x -= scrollx
-        # self.hitrect.y -= scrolly
-        # pygame.draw.rect(display, RED, self.hitrect)
 
-    def update(self, inventory, world):
-        """
-        updates the player object
-
-        Args:
-            inventory, world
-        """
-
-        # drop collisions
-        for drop in list(world.drops):
-            if self.rect.colliderect(drop.rect):
-                world.popups.append(FadingText(self.rect.centerx,
-                                               self.rect.top, "+{} x {}".format(drop.amount,
-                                                                                drop.item),
-                                               world.current_biome))
-                inventory.add_to_inventory(drop.item, drop.amount)
-                world.drops.remove(drop)
-
-        if self.sound_cooldown > 0:
-            self.sound_cooldown -= 1
-
+    def _move(self, world):
         if not self.moving_right and not self.moving_left:
             if self.dx > 0:
                 self.dx -= 1
@@ -148,13 +125,6 @@ class Player():
             elif self.dx < -self.speed:
                 self.dx += 1
 
-        # death
-        if self.health <= 0:
-            death_sound.play()
-            self.rect.x = 0
-            self.rect.y = -100
-            self.health = self.max_health
-
         # gravity and falling
         if self.collisions["down"] is False: # gravity
             if self.dy < self.max_gravity:
@@ -177,9 +147,39 @@ class Player():
         else:
             move(self, world, True)
 
-        self.animation()
+    def update(self, inventory, world):
+        """
+        updates the player object
 
-    def animation(self): # pragma: no cover
+        Args:
+            inventory, world
+        """
+
+        # drop collisions
+        for drop in list(world.drops):
+            if self.rect.colliderect(drop.rect):
+                world.popups.append(FadingText(self.rect.centerx,
+                                               self.rect.top, "+{} x {}".format(drop.amount,
+                                                                                drop.item),
+                                               world))
+                inventory.add_to_inventory(drop.item, drop.amount)
+                world.drops.remove(drop)
+
+        if self.sound_cooldown > 0:
+            self.sound_cooldown -= 1
+
+
+        # death
+        if self.health <= 0:
+            death_sound.play()
+            self.rect.x = 0
+            self.rect.y = -100
+            self.health = self.max_health
+
+        self._move(world)
+        self._animation()
+
+    def _animation(self): # pragma: no cover
         """
         changes the player images to create the appearence of a running animation
         """

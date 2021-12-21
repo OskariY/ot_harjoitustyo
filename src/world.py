@@ -1,4 +1,5 @@
 import noise
+import time
 import random
 import pygame
 from settings import BLACK, WHITE, GRAY, BROWN, GRASSGREEN, TILE_SIZE, \
@@ -97,14 +98,19 @@ class World():
 
                 if MOB_SPAWNS:
                     # caveworm spawns
-                    if self.game_map[target_chunk][1] == 3 and random.randint(1, 30000) == 1 and self.current_biome == 3:
-                        if abs(player.rect.x - target_x*TILE_SIZE*CHUNK_SIZE) > 150 and abs(player.rect.y - target_y*TILE_SIZE*CHUNK_SIZE) > 150:
-                            self.worms.append(Worm(target_x*TILE_SIZE*CHUNK_SIZE,target_y*TILE_SIZE*CHUNK_SIZE))
+                    if self.game_map[target_chunk][1] == 3 and random.randint(1, 30000) == 1 and \
+                            self.current_biome == 3:
+                        if abs(player.rect.x - target_x*TILE_SIZE*CHUNK_SIZE) > 150 and \
+                                abs(player.rect.y - target_y*TILE_SIZE*CHUNK_SIZE) > 150:
+                            self.worms.append(Worm(target_x*TILE_SIZE*CHUNK_SIZE,
+                                                   target_y*TILE_SIZE*CHUNK_SIZE))
 
                     # bird spawns
-                    if len(self.game_map[target_chunk][0]) == 0 and self.game_map[target_chunk][1] == 2:
-                        if random.randint(1, 30000) == 1 and len(self.mobs) < MOB_LIMIT:
-                            bird = FlyingMob(target_x*TILE_SIZE*CHUNK_SIZE, target_y*TILE_SIZE*CHUNK_SIZE)
+                    if len(self.game_map[target_chunk][0]) == 0 and \
+                            self.game_map[target_chunk][1] == 2:
+                        if random.randint(1, 20000) == 1 and len(self.mobs) < MOB_LIMIT:
+                            bird = FlyingMob(target_x*TILE_SIZE*CHUNK_SIZE,
+                                             target_y*TILE_SIZE*CHUNK_SIZE)
                             self.mobs.append(bird)
                             self.entities.append(bird)
 
@@ -134,11 +140,12 @@ class World():
                     # mob spawns
                     if MOB_SPAWNS:
                         if tile[1] in ["snowy grass", "grass"]:
-                            if random.randint(1, 30000) == 1 and len(self.mobs) < MOB_LIMIT:
+                            if len(self.mobs) < MOB_LIMIT:
                                 mobtype = ""
-                                if self.is_night:
+                                if random.randint(1, 10000) == 1 and self.is_night:
                                     mobtype = "zombie"
-                                elif self.current_biome == 2:
+                                if random.randint(1, 30000) == 1 and not self.is_night \
+                                        and self.current_biome == 2:
                                     mobtype = "bear"
                                 if mobtype != "":
                                     if tile[0][0]*TILE_SIZE < player.rect.x - 100 \
@@ -214,7 +221,7 @@ class World():
                     chunk_data[1] = 3
                     if caveheight < 3:
                         tile_type = "stone"
-                        if caveheight < -15:
+                        if caveheight < -10:
                             tile_type = "coal block"
 
                 # dirt
@@ -280,13 +287,15 @@ class World():
         posy = pos[1]
         # proceed if the distance between the player and pos is at most 5 tiles
         # or if the nodistance flag is enabled
-        if abs(posx - player.rect.centerx) < 5*TILE_SIZE or nodistance and abs(posy - player.rect.centery) < 5*TILE_SIZE or nodistance:
+        if abs(posx - player.rect.centerx) < 5*TILE_SIZE or nodistance and \
+                abs(posy - player.rect.centery) < 5*TILE_SIZE or nodistance:
             # get chunk
             chunk = self.get_chunk(pos)
             if chunk is not None:
                 # loop throught tile in the chunk
                 for tile in self.game_map[chunk][0]:
-                    tilerect = pygame.Rect(tile[0][0]*TILE_SIZE, tile[0][1]*TILE_SIZE, TILE_SIZE, TILE_SIZE)
+                    tilerect = pygame.Rect(tile[0][0]*TILE_SIZE, tile[0][1]*TILE_SIZE,
+                                           TILE_SIZE, TILE_SIZE)
                     # if a tile exists at pos remove it
                     if tilerect.collidepoint(posx, posy):
                         self.game_map[chunk][0].remove(tile)
@@ -449,12 +458,15 @@ class World():
         """
         posx = pos[0]
         posy = pos[1]
-        if abs(posx - player.rect.centerx) < 5*TILE_SIZE and abs(posy - player.rect.centery) < 5*TILE_SIZE and equipped != "":
+        if abs(posx - player.rect.centerx) < 5*TILE_SIZE and \
+                abs(posy - player.rect.centery) < 5*TILE_SIZE and equipped != "":
             if ITEMS[equipped]["tool"]:
                 tile = self.get_tile(pos)
                 if tile is not None:
                     color = BLACK
-                    drawrect = pygame.Rect(tile[0][0]*TILE_SIZE-self.scrollx, tile[0][1]*TILE_SIZE-self.scrolly, TILE_SIZE, TILE_SIZE)
+                    drawrect = pygame.Rect(tile[0][0]*TILE_SIZE-self.scrollx,
+                                           tile[0][1]*TILE_SIZE-self.scrolly,
+                                           TILE_SIZE, TILE_SIZE)
                     if self.current_biome == 3:
                         color = WHITE
                     pygame.draw.rect(display, color, drawrect, 1)
@@ -470,7 +482,7 @@ class World():
                             if tilerect.collidepoint(posx, posy):
                                 tilerect.x -= self.scrollx
                                 tilerect.y -= self.scrolly
-                                if self.current_biome == 3:
+                                if self.current_biome == 3 or self.is_night:
                                     color = WHITE
                                 else:
                                     color = BLACK

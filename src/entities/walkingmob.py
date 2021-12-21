@@ -59,6 +59,7 @@ class WalkingMob():
         """
         if abs(self.rect.x - player.rect.x) > 700 or abs(self.rect.y < player.rect.y) > 700:
             world.mobs.remove(self)
+            world.entities.remove(self)
 
         if self.health <= 0:
             # blood particles
@@ -69,62 +70,62 @@ class WalkingMob():
 
             world.mobs.remove(self)
             world.entities.remove(self)
-        else:
-            # animation
-            self.animation_counter += 1
-            if self.animation_counter == self.animation_repeat:
-                self.animation_counter = 0
-                self.image_index += 1
-                if self.image_index > len(self.images) - 1:
-                    self.image_index = 0
-                self.image = self.images[self.image_index]
+        # animation
+        self.animation_counter += 1
+        if self.animation_counter == self.animation_repeat:
+            self.animation_counter = 0
+            self.image_index += 1
+            if self.image_index > len(self.images) - 1:
+                self.image_index = 0
+            self.image = self.images[self.image_index]
 
-            # aggro to player
-            if self.rect.right > world.scrollx or self.rect.left < DISPLAY_WIDTH + world.scrollx:
-                self.aggroed = True
+        # aggro to player
+        if self.rect.right > world.scrollx or self.rect.left < DISPLAY_WIDTH + world.scrollx:
+            self.aggroed = True
+        self._move(player, world)
 
-            # movement
-            if self.aggroed:
-                if self.rect.centerx < player.rect.centerx - TILE_SIZE:
-                    if self.dx < self.speed:
-                        self.dx += 0.5
-                    if self.mobtype == "bear":
-                        self.inverse = 1
-                    else:
-                        self.inverse = 0
-                elif self.rect.centerx > player.rect.centerx + TILE_SIZE:
-                    if self.dx > -self.speed:
-                        self.dx -= 0.5
-                    if self.mobtype == "bear":
-                        self.inverse = 0
-                    else:
-                        self.inverse = 1
-            # hard speed gap
-            if self.dx > self.max_speed:
-                self.dx = self.max_speed
-            if self.dx < -self.max_speed:
-                self.dx = -self.max_speed
-
-            # soft speed gap
-            if self.dx > self.speed:
-                self.dx -= 0.1
-            if self.dx < -self.speed:
-                self.dx += 0.1
-
-            move(self, world, True)
-
-            if self.collisions["left"] or self.collisions["right"]:
-                if self.jumps:
-                    self.dy = -self.jumppower
-                    self.jumps = 0
-
-            if self.collisions["down"]: # gravity
-                self.dy = 0
-                self.jumps = 1
+    def _move(self, player, world):
+        # movement
+        if self.rect.centerx < player.rect.centerx - TILE_SIZE:
+            if self.dx < self.speed:
+                self.dx += 0.5
+            if self.mobtype == "bear":
+                self.inverse = 1
             else:
-                if (self.rect.y-world.scrolly) < DISPLAY_HEIGHT:
-                    if self.dy < self.max_gravity:
-                        self.dy += self.gravity
+                self.inverse = 0
+        elif self.rect.centerx > player.rect.centerx + TILE_SIZE:
+            if self.dx > -self.speed:
+                self.dx -= 0.5
+            if self.mobtype == "bear":
+                self.inverse = 0
+            else:
+                self.inverse = 1
+        # hard speed gap
+        if self.dx > self.max_speed:
+            self.dx = self.max_speed
+        if self.dx < -self.max_speed:
+            self.dx = -self.max_speed
+
+        # soft speed gap
+        if self.dx > self.speed:
+            self.dx -= 0.1
+        if self.dx < -self.speed:
+            self.dx += 0.1
+
+        move(self, world, True)
+
+        if self.collisions["left"] or self.collisions["right"]:
+            if self.jumps:
+                self.dy = -self.jumppower
+                self.jumps = 0
+
+        if self.collisions["down"]: # gravity
+            self.dy = 0
+            self.jumps = 1
+        else:
+            if (self.rect.y-world.scrolly) < DISPLAY_HEIGHT:
+                if self.dy < self.max_gravity:
+                    self.dy += self.gravity
 
     def draw(self, display, world): # pragma: no cover
         """

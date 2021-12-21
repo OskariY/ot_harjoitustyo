@@ -2,11 +2,15 @@
 Maailma on satunnaisesti generoitu, joten jokainen maailma on erilainen. Maan päältä löytyy tällä
 hetkellä kahdenlaisia biomeita. Toinen on leuto metsäbiomi ja toinen on vaarallinen tundrabiomi.
 Näistä vain tundrabiomille ilmestyy vihollisia. Maan alla on luolastoja, joista löytyy hiiltä
-ja luolamatoja.
+ja luolamatoja. Uusi maailma alkaa aina aamusta, mutta vuorokausi kiertää tässä versiossa varsin
+nopeasti. Yöllä ilmestyy suuria määriä zombeja.
 
 # Viholliset
 ### Karhu
 Ilmestyy tundrabiomille ja kävelee pelaajaa päin tehden vahinkoa.
+
+### Zombie
+Ilmestyy yöllä suurissa määrissä, vastaa käytökseltään karhua
 
 ### Lintu
 Ilmestyy tundrabiomille ja lentää pelaajaa päin tehden vahinkoa.
@@ -29,7 +33,7 @@ ESCAPE: avaa/sulje pause valikko
 
 Numerot 1-5: valitse esine hotbarissa
 
-F1: Avaa konsoli
+F1: Avaa konsoli, kirjoita help nähdäksesi komennot
 
 F3: chunk debug näkymä, näyttää mm. chunkkien ja palikkojen rajat, koordinaatit ja nykyisen biomin
 

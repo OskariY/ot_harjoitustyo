@@ -3,10 +3,16 @@ from settings import WHITE, BLACK, BLUE, FONT, TILE_SIZE, CHUNK_SIZE, RED, GREEN
 
 def print_text(text, x, y, display, allignment=0, size=32, color=BLACK): # pragma: no cover
     """
-    Prints text onto the screen
+    Draws text onto the screen
     allignments: 0=left, 1=center, 2=right
     Args:
-        text, x, y, display, allignment=0, size=32, color=BLACK
+        text
+        x
+        y
+        display: surface to draw on
+        allignment: 0=left, 1=center, 2=right (default=0)
+        size: font size
+        color: text color
     """
     font = pygame.font.SysFont(FONT, size)
     surf = font.render(text, False, color)
