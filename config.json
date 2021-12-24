@@ -4,5 +4,5 @@
     "windowed_height": 900,
     "music": true,
     "mob_spawns": true,
-    "mob_limit": 20
+    "mob_limit": 10
 }

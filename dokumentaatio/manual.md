@@ -41,7 +41,8 @@ F9: luo ja lataa maailman "test", hyödyllinen maailman generoinnin testaamiseen
 
 # Taistelu
 Kaikilla työkaluilla voi löydä vihollisia. Valitse kirves, hakku tai lapio hotbarissa ja klikkaa
-vasemmalla hiiren napilla osoittaen kursorilla jotain vihollista.
+vasemmalla hiiren napilla osoittaen kursorilla jotain vihollista. Voit myös tehdä jousen ja
+nuolia ja ampua sillä vihollisia.
 
 # Rakentaminen
 Valitse hotbarista joku esine, jolla voi rakentaa (mm. mikä tahansa palikka), osoita kursori

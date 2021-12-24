@@ -1,7 +1,7 @@
 import noise
 import time
-import random
 import pygame
+from numpy import random
 from settings import BLACK, WHITE, GRAY, BROWN, GRASSGREEN, TILE_SIZE, \
                      CHUNK_SIZE, DISPLAY_WIDTH, DISPLAY_HEIGHT, \
                      MOB_SPAWNS, \
@@ -54,6 +54,7 @@ class World():
         self.particles = []
         self.popups = []
         self.drops = []
+        self.arrows = []
 
     def update(self, player):
         """
@@ -64,6 +65,48 @@ class World():
         self.scrolly += round((player.rect.centery-self.scrolly-DISPLAY_HEIGHT//2) / 20)
 
         self.current_biome = self.get_biome((player.rect.x, player.rect.y))
+
+    def spawn_mobs(self, target_chunk, player):
+        target_x, target_y = (int(i) for i in target_chunk.split(";"))
+        if len(self.mobs) < MOB_LIMIT:
+            rng = random.randint(1, 3000)
+
+            # caveworm spawns
+            if self.game_map[target_chunk][1] == 3 and rng == 1 and self.current_biome == 3:
+                if abs(player.rect.x - target_x*TILE_SIZE*CHUNK_SIZE) > 150 and \
+                        abs(player.rect.y - target_y*TILE_SIZE*CHUNK_SIZE) > 150:
+                    self.worms.append(Worm(target_x*TILE_SIZE*CHUNK_SIZE,
+                                           target_y*TILE_SIZE*CHUNK_SIZE))
+
+            # bird spawns
+            if len(self.game_map[target_chunk][0]) == 0 and \
+                    self.game_map[target_chunk][1] == 2:
+                if rng == 2:
+                    bird = FlyingMob(target_x*TILE_SIZE*CHUNK_SIZE,
+                                     target_y*TILE_SIZE*CHUNK_SIZE)
+                    self.mobs.append(bird)
+                    self.entities.append(bird)
+
+            if 0 < len(self.game_map[target_chunk][0]) < CHUNK_SIZE * CHUNK_SIZE and \
+                    self.game_map[target_chunk][1] != 3:
+                mobtype = ""
+                if self.is_night:
+                    if rng == 4:
+                        mobtype = "zombie"
+                    elif rng == 5:
+                        mobtype = "skeleton"
+                else:
+                    if rng == 6 and self.game_map[target_chunk][1] == 2:
+                        mobtype = "bear"
+                if mobtype != "":
+                    tile = self.game_map[target_chunk][0][0] # take the first tile in the chunk
+                    if tile[0][0]*TILE_SIZE < player.rect.x - 100 \
+                            or tile[0][0]*TILE_SIZE > player.rect.x + 100:
+                        self.console.log(f"{mobtype} spawned, mobs: {len(self.mobs)}")
+                        bear = WalkingMob(tile[0][0]*TILE_SIZE,
+                                          tile[0][1]*TILE_SIZE-48, mobtype)
+                        self.mobs.append(bear)
+                        self.entities.append(bear)
 
     def generate_world(self, display, player): # pragma: no cover
         """
@@ -97,22 +140,7 @@ class World():
                     self.game_map[target_chunk] = self.generate_chunk(target_x, target_y)
 
                 if MOB_SPAWNS:
-                    # caveworm spawns
-                    if self.game_map[target_chunk][1] == 3 and random.randint(1, 30000) == 1 and \
-                            self.current_biome == 3:
-                        if abs(player.rect.x - target_x*TILE_SIZE*CHUNK_SIZE) > 150 and \
-                                abs(player.rect.y - target_y*TILE_SIZE*CHUNK_SIZE) > 150:
-                            self.worms.append(Worm(target_x*TILE_SIZE*CHUNK_SIZE,
-                                                   target_y*TILE_SIZE*CHUNK_SIZE))
-
-                    # bird spawns
-                    if len(self.game_map[target_chunk][0]) == 0 and \
-                            self.game_map[target_chunk][1] == 2:
-                        if random.randint(1, 20000) == 1 and len(self.mobs) < MOB_LIMIT:
-                            bird = FlyingMob(target_x*TILE_SIZE*CHUNK_SIZE,
-                                             target_y*TILE_SIZE*CHUNK_SIZE)
-                            self.mobs.append(bird)
-                            self.entities.append(bird)
+                    self.spawn_mobs(target_chunk, player)
 
                 # go through all tiles in the target chunk
                 for tile in self.game_map[target_chunk][0]:
@@ -137,24 +165,6 @@ class World():
                                      (tile[0][0]*TILE_SIZE-self.scrollx,
                                       tile[0][1]*TILE_SIZE-self.scrolly))
 
-                    # mob spawns
-                    if MOB_SPAWNS:
-                        if tile[1] in ["snowy grass", "grass"]:
-                            if len(self.mobs) < MOB_LIMIT:
-                                mobtype = ""
-                                if random.randint(1, 10000) == 1 and self.is_night:
-                                    mobtype = "zombie"
-                                if random.randint(1, 30000) == 1 and not self.is_night \
-                                        and self.current_biome == 2:
-                                    mobtype = "bear"
-                                if mobtype != "":
-                                    if tile[0][0]*TILE_SIZE < player.rect.x - 100 \
-                                            or tile[0][0]*TILE_SIZE > player.rect.x + 100:
-                                        self.console.log(f"{mobtype} spawned, mobs: {len(self.mobs)}")
-                                        bear = WalkingMob(tile[0][0]*TILE_SIZE,
-                                                          tile[0][1]*TILE_SIZE-48, mobtype)
-                                        self.mobs.append(bear)
-                                        self.entities.append(bear)
 
                     # physics
                     if tile[1] in ["stone","dirt","grass","snowy grass","plank","rock","coal block","slab"]:
@@ -221,7 +231,7 @@ class World():
                     chunk_data[1] = 3
                     if caveheight < 3:
                         tile_type = "stone"
-                        if caveheight < -10:
+                        if caveheight < -9:
                             tile_type = "coal block"
 
                 # dirt

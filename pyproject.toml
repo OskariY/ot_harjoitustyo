@@ -6,10 +6,11 @@ authors = ["Oskari Ylönen <oskari@ylonen.org>"]
 license = "GPL"
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = ">=3.8,<3.11"
 pygame = "^2.1.0"
 noise = "^1.2.2"
 invoke = "^1.6.0"
+numpy = "^1.21.5"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"

@@ -22,7 +22,7 @@ def print_text(text, x, y, display, allignment=0, size=32, color=BLACK): # pragm
         x = x - surf.get_width()
     display.blit(surf, (x, y))
 
-def move(entity, world, entity_collisions=False):
+def move(entity, world, entity_collisions=False, falling=False):
     """
     Moves an entity while checking for collisions.
 
@@ -65,8 +65,11 @@ def move(entity, world, entity_collisions=False):
     for tile in world.tiles:
         if entity.rect.colliderect(tile):
             if entity.dy > 0:
-                entity.rect.bottom = tile.top
-                collisions["down"] = True
+                if falling and tile in world.slabs:
+                    pass
+                else:
+                    entity.rect.bottom = tile.top
+                    collisions["down"] = True
             if entity.dy < 0:
                 if not tile in world.slabs:
                     entity.rect.top = tile.bottom

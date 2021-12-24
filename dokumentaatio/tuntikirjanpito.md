@@ -20,4 +20,6 @@
 | 14.12 | 3    | dokumentaation kirjoittamista ja bugien korjausta |
 | 18.12 | 3    | vuorokausisysteemi, zombiet ja uusi pelaajamodeli |
 | 21.12 | 4    | koodin siivousta, dokumentaatiota ja buginkorjausta |
-| yht   | 66   | |
+| 22.12 | 2    | jousipyssyn ja nuolien lisääminen, pieniä muutoksia crafting-järjestelmään |
+| 23.12 | 2    | luurankovihollisen lisäys ja mob spawnien optimointia |
+| yht   | 70   | |

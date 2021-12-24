@@ -2,6 +2,7 @@ import pygame
 from resources import ITEMS, CRAFTING_REQUIREMENTS, select_arrow
 from settings import CENTER, TILE_SIZE, GRAY, WHITE, BLACK, BROWN, RED
 from functions import print_text
+from entities.drop import DroppedItem
 
 class Inventory():
     """
@@ -11,6 +12,9 @@ class Inventory():
         self.surface = pygame.Surface((300, 32*6+2))
         self.invx = CENTER[0] - self.surface.get_width() // 2
         self.invy = CENTER[1] - self.surface.get_height() // 2
+        self.rect = self.surface.get_rect()
+        self.rect.x = self.invx
+        self.rect.y = self.invy
         self.inv_select1 = -1
         self.inv_select2 = -1
         self.equipped = ""
@@ -95,6 +99,8 @@ class Inventory():
             for itemname in self.visible_crafting_items:
                 self.surface.blit(ITEMS[itemname]["image"],
                                   (self.crafting_window.x + x, self.crafting_window.y + y))
+                if CRAFTING_REQUIREMENTS[itemname]["amount"] > 1:
+                    itemname = f"{itemname} x{CRAFTING_REQUIREMENTS[itemname]['amount']}"
                 print_text(itemname, self.crafting_window.x + x + 18, self.crafting_window.y + y,
                            self.surface, 0, 8, WHITE)
                 y += self.crafting_window.height // 3
@@ -110,7 +116,7 @@ class Inventory():
                     print_text("Requirements", x+self.crafting_window.width//2, y - 18,
                                self.surface, 1, 16, BLACK)
                     # check requirements for crafting
-                    for requirement in CRAFTING_REQUIREMENTS[self.visible_crafting_items[self.crafting_item_selected]]:
+                    for requirement in CRAFTING_REQUIREMENTS[self.visible_crafting_items[self.crafting_item_selected]]["requirements"]:
                         self.surface.blit(ITEMS[requirement[0]]["image"], (x, y))
                         textcolor = RED
                         # text is black if you have the item, red if you don't
@@ -263,3 +269,16 @@ class Inventory():
                 self.index_equipped = i
             else:
                 item[3] = False
+
+    def drop_item(self, world, player, item, amount):
+        if self.in_inventory(item, amount):
+            self.remove_item(item, amount)
+            if player.invert:
+                dx = -2
+                x = player.rect.left - 14
+            else:
+                dx = 2
+                x = player.rect.right + 1
+            dy = -2
+            y = player.rect.centery
+            world.drops.append(DroppedItem(x, y, dx, dy, item, amount))

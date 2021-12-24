@@ -10,7 +10,10 @@ class DroppedItem():
 
     def __init__(self, x, y, dx, dy, item, amount=1):
         self.image = ITEMS[item]["image"]
-        size = TILE_SIZE - 4
+        if item in ["arrow", "stick", "arrow tip"]:
+            size = TILE_SIZE
+        else:
+            size = TILE_SIZE - 4
 
         self.image = pygame.transform.scale(self.image, (size, size))
         self.rect = pygame.Rect(x, y, self.image.get_width(), self.image.get_height())

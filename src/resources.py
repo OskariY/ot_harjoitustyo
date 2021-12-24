@@ -11,17 +11,16 @@ IMAGES_DIR = "resources/images/"
 pygame.mixer.init()
 
 # songs
-if MUSIC:
-    sound_names = os.listdir(f"{MUSIC_DIR}")
-    songs = []
-    random.shuffle(sound_names)
-    for song in sound_names:
-        if song.endswith(".mp3"):
-            if songs == []:
-                pygame.mixer.music.load(f"{MUSIC_DIR}{song}")
-                pygame.mixer.music.set_endevent(pygame.constants.USEREVENT)
-                pygame.mixer.music.play()
-            songs.append(f"{MUSIC_DIR}{song}")
+sound_names = os.listdir(f"{MUSIC_DIR}")
+songs = []
+random.shuffle(sound_names)
+for song in sound_names:
+    if song.endswith(".mp3"):
+        if songs == [] and MUSIC:
+            pygame.mixer.music.load(f"{MUSIC_DIR}{song}")
+            pygame.mixer.music.set_endevent(pygame.constants.USEREVENT)
+            pygame.mixer.music.play()
+        songs.append(f"{MUSIC_DIR}{song}")
 
 # sound effects
 jump_sound = pygame.mixer.Sound(f"{MUSIC_DIR}jump.wav")
@@ -90,6 +89,8 @@ hoe_image.set_colorkey(WHITE)
 
 
 # others
+bow_image = pygame.image.load(f"{IMAGES_DIR}bow.png")
+bow_image.set_colorkey(GREEN)
 select_arrow = pygame.image.load(f"{IMAGES_DIR}select_arrow.png")
 select_arrow.set_colorkey(WHITE)
 sapling_image = pygame.image.load(f"{IMAGES_DIR}sapling.png").convert()
@@ -99,9 +100,17 @@ slab_image.set_colorkey(WHITE)
 coal_item = pygame.image.load(f"{IMAGES_DIR}coal.png").convert()
 coal_item.set_colorkey(WHITE)
 arrow_image = pygame.image.load(f"{IMAGES_DIR}arrow.png").convert()
-arrow_image.set_colorkey(WHITE)
+arrow_image.set_colorkey(GREEN)
+arrow_tip_image = pygame.image.load(f"{IMAGES_DIR}arrow_tip.png").convert()
+arrow_tip_image.set_colorkey(GREEN)
+string_image = pygame.image.load(f"{IMAGES_DIR}string.png").convert()
+string_image.set_colorkey(GREEN)
+stick_image = pygame.image.load(f"{IMAGES_DIR}stick.png").convert()
+stick_image.set_colorkey(GREEN)
 torch_image = pygame.image.load(f"{IMAGES_DIR}torch.png").convert()
 torch_image.set_colorkey(WHITE)
+tonttulakki = pygame.image.load(f"{IMAGES_DIR}tonttulakki.png").convert()
+tonttulakki.set_colorkey(GREEN)
 meat_image = pygame.image.load(f"{IMAGES_DIR}meat.png").convert()
 meat_image.set_colorkey(GREEN)
 worm_head = pygame.image.load(f"{IMAGES_DIR}worm/head.png").convert()
@@ -122,15 +131,15 @@ for i in range(0, 12):
 
 zombie_walking = []
 for i in range(1, 4):
-    image = pygame.image.load("{}zombie/zombie_walking{}.png".format(IMAGES_DIR, str(i)))
+    image = pygame.image.load("{}zombie/zombie_walking{}.png".format(IMAGES_DIR, str(i))).convert()
     image.set_colorkey(GREEN)
     zombie_walking.append(image)
 
-skeleton_images = []
-for i in range(1, 3):
-    image = pygame.image.load("{}skeleton/skeleton{}.png".format(IMAGES_DIR, str(i)))
+skeleton_walking = []
+for i in range(1, 4):
+    image = pygame.image.load("{}skeleton/walking{}.png".format(IMAGES_DIR, str(i))).convert()
     image.set_colorkey(GREEN)
-    skeleton_images.append(image)
+    skeleton_walking.append(image)
 
 crow_images = []
 for i in range(1, 4):
@@ -186,19 +195,47 @@ ITEMS = {
         "build": False,
         "tool":  True,
         },
-    "palosammutin": {
-        "image": arrow_image,
-        "stack": 999,
-        "food": False,
-        "build": False,
-        "tool": False,
-        },
     "hammer": {
         "image": hammer_image,
         "stack": 1,
         "food": False,
         "build": False,
         "tool":  True,
+        },
+    "bow": {
+        "image": bow_image,
+        "stack": 1,
+        "food": False,
+        "build": False,
+        "tool":  True,
+        },
+    "arrow": {
+        "image": arrow_image,
+        "stack": 999,
+        "food": False,
+        "build": False,
+        "tool": False,
+        },
+    "arrow tip": {
+        "image": arrow_tip_image,
+        "stack": 999,
+        "food": False,
+        "build": False,
+        "tool": False,
+        },
+    "stick": {
+        "image": stick_image,
+        "stack": 999,
+        "food": False,
+        "build": False,
+        "tool": False,
+        },
+    "string": {
+        "image": string_image,
+        "stack": 999,
+        "food": False,
+        "build": False,
+        "tool": False,
         },
     "meat": {
         "image": meat_image,
@@ -346,30 +383,76 @@ ITEMS = {
 }
 
 CRAFTING_REQUIREMENTS = {
-    "plank wall": [
-        ["plank", 2],
-    ],
-    "pickaxe": [
-        ["plank", 3],
-        ["rock", 3]
-    ],
-    "axe": [
-        ["plank", 3],
-        ["rock", 3]
-    ],
-    "shovel": [
-        ["plank", 3],
-        ["rock", 3]
-    ],
-    "torch": [
-        ["plank", 1],
-        ["coal", 1]
-    ],
-    "slab": [
-        ["plank", 3],
-    ],
-    "hoe": [
-        ["plank", 3],
-        ["stone", 3],
-    ],
+    "plank wall": {
+        "amount": 1,
+        "requirements": [
+            ("plank", 2),
+            ]
+    },
+    "slab": {
+        "amount": 1,
+        "requirements": [
+            ("plank", 2),
+            ]
+    },
+    "pickaxe": {
+        "amount": 1,
+        "requirements": [
+            ("plank", 3),
+            ("rock", 3),
+            ]
+    },
+    "shovel": {
+        "amount": 1,
+        "requirements": [
+            ("plank", 3),
+            ("rock", 3),
+            ]
+    },
+    "axe": {
+        "amount": 1,
+        "requirements": [
+            ("plank", 3),
+            ("rock", 3),
+            ]
+    },
+    "torch": {
+        "amount": 1,
+        "requirements": [
+            ("stick", 1),
+            ("coal", 1),
+            ]
+    },
+    "stick": {
+        "amount": 10,
+        "requirements": [
+            ("plank", 1),
+            ]
+    },
+    "arrow tip": {
+        "amount": 10,
+        "requirements": [
+            ("rock", 1),
+            ]
+    },
+    "arrow": {
+        "amount": 10,
+        "requirements": [
+            ("arrow tip", 10),
+            ("stick", 10),
+            ]
+    },
+    "string": {
+        "amount": 1,
+        "requirements": [
+            ("plant", 2),
+            ]
+    },
+    "bow": {
+        "amount": 1,
+        "requirements": [
+            ("stick", 10),
+            ("string", 3),
+            ]
+    },
 }

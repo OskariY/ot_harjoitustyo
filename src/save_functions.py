@@ -59,7 +59,7 @@ def create_world(name):
         "worm_coords": [],
         "drops": [],
         "inventory": [],
-        "tod": 95000,
+        "tod": 0,
 
         # world generation parameters
         "seed": random.randint(-9999999,9999999),

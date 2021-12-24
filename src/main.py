@@ -7,6 +7,7 @@ spaghetti code.
 """
 
 import sys
+import math
 import pygame
 
 # import constants/settings
@@ -28,13 +29,14 @@ clock = pygame.time.Clock()
 
 # import functions, classes and resources (images, sound etc.) needed
 from resources import ITEMS, CRAFTING_REQUIREMENTS, jump_sound, break_sound, hurt_sound, songs, \
-                      evening, morning, night, darkness, glow
+                      evening, morning, night, darkness, glow, throw_sound
 from entities.player import Player
 from entities.particle import Particle
 from entities.fadingtext import FadingText
 from entities.walkingmob import WalkingMob
 from entities.flyingmob import FlyingMob
 from entities.caveworm import Worm
+from entities.arrow import Arrow
 from inventory import Inventory
 from functions import print_text, chunk_debug
 from world import World
@@ -156,10 +158,11 @@ def main(world_name):
                     if event.key == pygame.K_s:
                         player.falling = True
                     # jump
-                    if event.key == pygame.K_w and player.jumps > 0: # jump
-                        player.dy = -player.jump_power
-                        player.jumps -= 1
-                        jump_sound.play()
+                    if event.key == pygame.K_w or event.key == pygame.K_SPACE:
+                        if player.jumps > 0: # jump
+                            player.dy = -player.jump_power
+                            player.jumps -= 1
+                            jump_sound.play()
                 # open inventory
                     if event.key == pygame.K_TAB:
                         if inv_open is False:
@@ -177,6 +180,8 @@ def main(world_name):
                         inventory.equip_item(3)
                     if event.key == pygame.K_5:
                         inventory.equip_item(4)
+                    if event.key == pygame.K_g:
+                        inventory.drop_item(world, player, inventory.equipped, 1)
                     if event.key == pygame.K_F8:
                         player.rect.y += 1000
                     if event.key == pygame.K_F9:
@@ -254,12 +259,13 @@ def main(world_name):
                                 if inventory.crafting_button.collidepoint((mousepos[0] - inventory.invx,
                                                                            mousepos[1] - inventory.invy)):
                                     have_requirements = True
-                                    for requirement in CRAFTING_REQUIREMENTS[inventory.visible_crafting_items[inventory.crafting_item_selected]]:
+                                    for requirement in CRAFTING_REQUIREMENTS[inventory.visible_crafting_items[inventory.crafting_item_selected]]["requirements"]:
                                         if not inventory.in_inventory(requirement[0], requirement[1]):
                                             have_requirements = False
                                     if have_requirements:
-                                        inventory.add_to_inventory(inventory.visible_crafting_items[inventory.crafting_item_selected], 1)
-                                        for requirement in CRAFTING_REQUIREMENTS[inventory.visible_crafting_items[inventory.crafting_item_selected]]:
+                                        amount = CRAFTING_REQUIREMENTS[inventory.visible_crafting_items[inventory.crafting_item_selected]]["amount"]
+                                        inventory.add_to_inventory(inventory.visible_crafting_items[inventory.crafting_item_selected], amount)
+                                        for requirement in CRAFTING_REQUIREMENTS[inventory.visible_crafting_items[inventory.crafting_item_selected]]["requirements"]:
                                             inventory.remove_item(requirement[0], requirement[1])
 
 
@@ -281,6 +287,21 @@ def main(world_name):
                                                     ))
                                 inventory.remove_item(inventory.equipped, 1)
 
+                            # bow logic
+                            if inventory.equipped == "bow" and inventory.in_inventory("bow") and \
+                                    inventory.in_inventory("arrow"):
+                                throw_sound.play()
+                                player.chop()
+                                distance_x = mousex - player.rect.centerx + world.scrollx
+                                distance_y = mousey - player.rect.centery + world.scrolly
+
+                                angle = math.atan2(distance_y, distance_x)
+                                speed_x = 5 * math.cos(angle)
+                                speed_y = 5 * math.sin(angle)
+                                arrow = Arrow(player.rect.centerx, player.rect.centery, speed_x, speed_y)
+                                world.arrows.append(arrow)
+                                inventory.remove_item("arrow", 1)
+
                             # tool logic
                             if ITEMS[inventory.equipped]["tool"] and inventory.in_inventory(inventory.equipped):
                                 player.hit(world, mousex, mousey)
@@ -290,16 +311,20 @@ def main(world_name):
                                     tile_hits_left = 10
                                 if breaking_tile is not None:
                                     # reduce tile_hits_left based on the tool and the tile
-                                    if inventory.equipped == "pickaxe" and breaking_tile[1] in ["stone", "coal block"]:
-                                        if breaking_tile[1] == "stone":
+                                    if inventory.equipped == "pickaxe" and \
+                                            breaking_tile[1] in ["rock", "stone", "coal block"]:
+                                        if breaking_tile[1] in ["stone", "rock"]:
                                             tile_hits_left -= 5
                                         if breaking_tile[1] == "coal block":
                                             tile_hits_left -= 2
-                                    elif inventory.equipped == "shovel" and breaking_tile[1] in ["dirt", "grass", "snowy grass"]:
+                                    elif inventory.equipped == "shovel" and \
+                                            breaking_tile[1] in ["dirt", "grass", "snowy grass"]:
                                         tile_hits_left -= 5
-                                    elif inventory.equipped == "axe" and breaking_tile[1] in ["tree1", "tree2", "tree3", "tree4"]:
-                                            tile_hits_left -= 2
-                                    elif inventory.equipped == "axe" and breaking_tile[1] in ["plank", "plank wall", "slab"]:
+                                    elif inventory.equipped == "axe" and \
+                                            breaking_tile[1] in ["tree1", "tree2", "tree3", "tree4"]:
+                                        tile_hits_left -= 2
+                                    elif inventory.equipped == "axe" and \
+                                            breaking_tile[1] in ["plank", "plank wall", "slab"]:
                                         tile_hits_left -= 5
                                     elif breaking_tile[1] in ["plant", "torch", "sapling"]:
                                         tile_hits_left = 0
@@ -356,33 +381,43 @@ def main(world_name):
                     if event.button == 1:
                         # loop through the inventory grid and test for collisions
                         # if mouse collides with an inventory slot call the inventory drag function
-                        for i, item in enumerate(inventory.inventory):
-                            testrect = item[0].copy()
-                            testrect.x += inventory.invx
-                            testrect.y += inventory.invy
-                            if testrect.collidepoint(mousepos):
-                                inventory.inv_select2 = i
-                                inventory.inventory_drag()
-                                inventory.inv_select1 = -1
-                                inventory.inv_select2 = -1
+                        if not inventory.rect.collidepoint(mousepos) and \
+                                inventory.inv_select1 != -1:
+                            inventory.drop_item(world, player,
+                                                inventory.inventory[inventory.inv_select1][1],
+                                                inventory.inventory[inventory.inv_select1][2])
+
+                            inventory.inv_select1 = -1
+                            inventory.inv_select2 = -1
+                        else:
+                            for i, item in enumerate(inventory.inventory):
+                                testrect = item[0].copy()
+                                testrect.x += inventory.invx
+                                testrect.y += inventory.invy
+                                if testrect.collidepoint(mousepos):
+                                    inventory.inv_select2 = i
+                                    inventory.inventory_drag()
+                                    inventory.inv_select1 = -1
+                                    inventory.inv_select2 = -1
+
             if event.type == pygame.MOUSEMOTION:
                 console.update()
         # drawing and updating game entities like the player
         player.draw(display, world, inventory)
         player.update(inventory, world)
 
-        for drop in world.drops:
+        for drop in list(world.drops):
             drop.update(world)
             drop.draw(display, world.scrollx, world.scrolly)
 
-        for popup in world.popups:
+        for popup in list(world.popups):
             popup.update(world.popups)
             popup.draw(display,world.scrollx, world.scrolly)
 
-        for particle in world.particles:
+        for particle in list(world.particles):
             particle.update(display, world.particles, world.scrollx, world.scrolly)
 
-        for mob in world.mobs:
+        for mob in list(world.mobs):
             mob.update(player, world)
             mob.draw(display, world)
             # check for collisions with the player
@@ -392,9 +427,13 @@ def main(world_name):
                     hurt_sound.play()
                     player.sound_cooldown = 10
 
-        for worm in world.worms:
+        for worm in list(world.worms):
             worm.update(player, world)
             worm.draw(display, world.scrollx, world.scrolly)
+
+        for arrow in list(world.arrows):
+            arrow.update(world, player)
+            arrow.draw(display, world)
 
         if world.tod > 40000 or world.current_biome == 3:
             for glowpos in world.glows:
@@ -402,7 +441,7 @@ def main(world_name):
 
         # set time of day and draw appropriate lighting
         # 0-40000 = day, 40000-50000 = evening, 50000-90000 = night, 90000-100000
-        world.tod += 10
+        world.tod += 1
         if world.current_biome != 3:
             if world.tod < 40000:
                 world.is_night = False

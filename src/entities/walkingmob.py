@@ -1,8 +1,10 @@
-import random
+import math
 import pygame
-from resources import polarbear_images, zombie_walking, skeleton_images
+from numpy import random
+from resources import polarbear_images, zombie_walking, skeleton_walking
 from entities.drop import DroppedItem
 from entities.particle import Particle
+from entities.arrow import Arrow
 from settings import TILE_SIZE, DISPLAY_WIDTH, DISPLAY_HEIGHT, GREEN, RED
 from functions import move, draw_health_bar
 
@@ -16,8 +18,9 @@ class WalkingMob():
         self.images = polarbear_images
         self.animation_repeat = 10
         if mobtype == "skeleton":
-            self.images = skeleton_images
-            self.anim_repeat = 20
+            self.images = skeleton_walking
+            self.anim_repeat = 15
+            self.arrow_counter = 0
         if mobtype == "zombie":
             self.images = zombie_walking
             self.anim_repeat = 15
@@ -27,7 +30,7 @@ class WalkingMob():
         self.rect.y = y
 
         self.mobtype = mobtype # makes retextured mobs with same logic possible
-        self.inverse = 0 # which way the mob is facing
+        self.invert = 0 # which way the mob is facing
 
         self.image_index = 0
         self.animation_counter = 0
@@ -65,11 +68,47 @@ class WalkingMob():
             # blood particles
             for i in range(40):
                 world.particles.append(Particle(self.rect.centerx, self.rect.centery, RED))
-            world.drops.append(DroppedItem(self.rect.x, self.rect.y,
-                                           self.dx, self.dy, "meat", random.randint(1, 5)))
+            # drops
+            drops = []
+            if self.mobtype == "zombie":
+                drop_rng = random.randint(1, 6)
+                if drop_rng in [1, 2]:
+                    drops.append(("meat", random.randint(1, 3)))
+                elif drop_rng == 3:
+                    drops.append(("arrow", random.randint(1, 3)))
+                elif drop_rng == 4:
+                    drops.append(("stick", random.randint(1, 3)))
+                elif drop_rng == 5:
+                    drops.append(("string", random.randint(1, 3)))
+                elif drop_rng == 6:
+                    drops.append(("rock", random.randint(1, 3)))
+            elif self.mobtype == "skeleton":
+                drop_rng = random.randint(1, 3)
+                if drop_rng == 1:
+                    drops.append(("arrow", random.randint(1, 10)))
+                elif drop_rng == 2:
+                    drops.append(("stick", random.randint(1, 3)))
+                elif drop_rng == 3:
+                    drops.append(("string", random.randint(1, 3)))
+            else:
+                drops.append(("meat", random.randint(1, 3)))
+            for drop in drops:
+                world.drops.append(DroppedItem(self.rect.x, self.rect.y,
+                                   self.dx//2, self.dy//2, drop[0], drop[1]))
 
             world.mobs.remove(self)
             world.entities.remove(self)
+
+        if self.mobtype == "skeleton":
+            # shooting arrows
+            if self.arrow_counter <= 0:
+                if abs(self.rect.x - player.rect.x) < 10 * TILE_SIZE:
+                    self.shoot(world, player.rect.x, player.rect.y)
+                    self.arrow_counter = 150
+            else:
+                self.arrow_counter -= 1
+
+
         # animation
         self.animation_counter += 1
         if self.animation_counter == self.animation_repeat:
@@ -84,22 +123,28 @@ class WalkingMob():
             self.aggroed = True
         self._move(player, world)
 
+    def shoot(self, world, x, y):
+        distance_x = x - self.rect.x
+        distance_y = y - self.rect.y - abs(distance_x)//3
+
+        angle = math.atan2(distance_y, distance_x)
+        speed_x = 5 * math.cos(angle)
+        speed_y = 5 * math.sin(angle)
+        arrow = Arrow(self.rect.centerx, self.rect.centery, speed_x, speed_y, True)
+        world.arrows.append(arrow)
+
     def _move(self, player, world):
         # movement
-        if self.rect.centerx < player.rect.centerx - TILE_SIZE:
+        if self.mobtype == "skeleton":
+            target_offset = TILE_SIZE * 5
+        else:
+            target_offset = TILE_SIZE
+        if self.rect.centerx < player.rect.centerx - target_offset:
             if self.dx < self.speed:
                 self.dx += 0.5
-            if self.mobtype == "bear":
-                self.inverse = 1
-            else:
-                self.inverse = 0
-        elif self.rect.centerx > player.rect.centerx + TILE_SIZE:
+        elif self.rect.centerx > player.rect.centerx + target_offset:
             if self.dx > -self.speed:
                 self.dx -= 0.5
-            if self.mobtype == "bear":
-                self.inverse = 0
-            else:
-                self.inverse = 1
         # hard speed gap
         if self.dx > self.max_speed:
             self.dx = self.max_speed
@@ -111,6 +156,18 @@ class WalkingMob():
             self.dx -= 0.1
         if self.dx < -self.speed:
             self.dx += 0.1
+
+        # set invert
+        if self.rect.x < player.rect.x:
+            if self.mobtype == "bear":
+                self.invert = 1
+            else:
+                self.invert = 0
+        else:
+            if self.mobtype == "bear":
+                self.invert = 0
+            else:
+                self.invert = 1
 
         move(self, world, True)
 
@@ -135,7 +192,7 @@ class WalkingMob():
         drawy = self.rect.y-world.scrolly
 
         # flip the image if needed and make it transparent
-        image = pygame.transform.flip(self.image, self.inverse, 0)
+        image = pygame.transform.flip(self.image, self.invert, 0)
         image.set_colorkey(GREEN)
         display.blit(image, (drawx, drawy))
 

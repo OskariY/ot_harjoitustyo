@@ -2,7 +2,7 @@ import math
 import pygame
 from settings import TILE_SIZE
 from resources import player_standing, player_walking, ITEMS, hurt_sound, death_sound, \
-                      player_hand, player_hand_straight
+                      player_hand, player_hand_straight, tonttulakki
 from entities.fadingtext import FadingText
 from functions import move, draw_health_bar
 
@@ -139,11 +139,18 @@ class Player():
         # movement function
         if self.falling:
             self.rect.y += 1
-            if self.rect.collidelist(world.slabs) == -1:
+            slab_collide = self.rect.collidelist(world.slabs)
+            if slab_collide == -1:
                 self.falling = False
                 self.rect.y -= 1
             else:
-                self.rect.y += 3
+                self.rect.x = world.slabs[slab_collide].x
+                self.rect.y += 1
+                if self.collisions["down"]:
+                    self.rect.bottom = world.slabs[slab_collide].y
+                    self.falling = False
+                else:
+                    move(self, world, True, True)
         else:
             move(self, world, True)
 
@@ -243,8 +250,12 @@ class Player():
         display.blit(hand1, (hand_x+self.hand1_pos, hand_y))
 
         # draw player to the screen
-        display.blit(pygame.transform.flip(self.image, self.invert, 0), (self.rect.x-world.scrollx, self.rect.y-world.scrolly))
+        display.blit(pygame.transform.flip(self.image, self.invert, 0),
+                     (self.rect.x-world.scrollx, self.rect.y-world.scrolly))
 
+        # draw tonttulakki (important)
+        display.blit(pygame.transform.flip(tonttulakki, self.invert, 0),
+                     (self.rect.x-world.scrollx, self.rect.y-world.scrolly-TILE_SIZE+1))
 
         # chopping animation
         if self.chopping_animation > 0:

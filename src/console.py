@@ -53,7 +53,7 @@ class Console:
                 self.log("Error: give takes two arguments, item and amount")
         elif cmd == "tp":
             if len(args) == 2:
-                if not args[0].isnumeric():
+                if not args[1].strip("-").isdigit():
                     self.log(f"Error: coordinate must be a number")
                 elif not args[1].strip("-").isdigit():
                     self.log(f"Error: coordinate must be a number")
