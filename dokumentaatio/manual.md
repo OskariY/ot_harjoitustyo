@@ -65,3 +65,7 @@ Inventorynäkymän oikeassa laidassa näkyy crafting-ikkuna. Crafting ikkunassa 
 painamalla sen alapuolella olevia nuolia. Kun olet valinnut esineen, sen tekemiseen tarvittavat
 asiat näkyvät joko punaisella, jos sinulla ei ole niitä, tai mustalla jos sinulla on ne jo. Paina
 "Craft" nappia tehdäksesi esine.
+
+# Config
+Projektin juurihakemistosta löytyy config.json tiedosto, josta voi vaihtaa asetuksia kuten
+musiikkia ja resoluutiota tai laittaa vihollisten spawnit pois päältä.
