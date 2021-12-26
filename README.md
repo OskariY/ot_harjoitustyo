@@ -1,8 +1,6 @@
 # Ohjelmistotekniikan harjoitustyö
 ## Northlands unspaghettified
-Koodi, tekstuurit ja äänet perustuvat omaan Northlands peliprojektiini. Opin kuitenkin monia asioita pelin kirjoittamisen aikana, joten lopputulos oli 2500 riviä huonosti kirjoitettua spagettikoodia yhdessä tiedostossa, jonka mielummin jätän julkaisematta.
-
-Tämä projekti on yritys siistiä ja uudelleenkirjoittaa aikaisempi spagettikoodi selkeämpään muotoon välttämällä aikaisempia hyvin runsaita globaaleja muuttujia, jakamalla koodia eri tiedostoihin, kirjoittamalla kommentteja ja ylipäätänsä pyrkimällä noudattamaan yleisiä hyvän koodauksen tapoja. Olen päättänyt yksinkertaistaa alkuperäistä peliä myös jossain määrin, esimerkiksi poistamalla moninpelitoiminnot.
+Tämän projektin idea on uudelleenkirjoittaa ja siistiä vanha sotkuinen peliprojekti.
 
 ## Pelin idea
 Northlands on 2D seikkailupeli, jossa pelaaja seikkailee satunnaisesti generoidussa maailmassa keräten resursseja, rakentaen ja yrittäen selvitä vihollisilta. Sain inspiraatiota peliin Minecraftin, Terrarian ja Valheimin tapaisista peleistä.
