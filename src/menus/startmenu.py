@@ -1,7 +1,22 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+#
+# Northlands is a 2D survival game inspired by games like Minecraft, Terriaria and Valheim
+# Copyright (C) 2021 Oskari Ylönen [oskari@ylonen.org]
+#
+# This program is free software: you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of  MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with
+# this program.  If not, see <http://www.gnu.org/licenses/>.
 """
-###Warning: old spaghetti code###
-
-viewer discretion is advised
+Contains the start menu, responsible mainly for creating and selecting worlds
 """
 
 import os
@@ -243,8 +258,8 @@ def startmenu(display, screen, clock):
                 pygame.draw.rect(display, BLACK, exit_game, 1)
                 exit_text = BLACK
 
-            print_text("The Northlands", CENTER[0], 32, display, 1, 48, BLACK)
-            print_text("The Northlands", CENTER[0]+2, 32, display, 1, 48, WHITE)
+            print_text("Northlands", CENTER[0], 32, display, 1, 48, BLACK)
+            print_text("Northlands", CENTER[0]+2, 32, display, 1, 48, WHITE)
             print_text("Start Game", start_game.centerx, start_game.centery-8,
                        display, 1, 16, start_text)
             print_text("Exit Game", exit_game.centerx, exit_game.centery-8,

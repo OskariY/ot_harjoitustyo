@@ -3,6 +3,7 @@
 ### Pakkausrakenne
 * src/
     * entities/
+    * tests/
     * menus/
     * world.py
     * inventory.py
@@ -10,6 +11,8 @@
     * save_functions.py
     * resources.py
     * settings.py
+    * console.py
+    * main.py
 * resources/
     * images/
     * music/
@@ -49,7 +52,8 @@ sisälle. Näistä tärkeimmät ovat `print_text()`, joka vastaa tekstin piirtä
 `move()`, joka vastaa entiteettien liikuttamisesta ja kollisioiden käsittelystä.
 
 ## Save functions
-Maailma tallennetaan dictionary-muodossa pickle tiedostoon.
+Sisältää maailmojen tallentamiseen ja lataamiseen liittyvät funktiot. Maailma tallennetaan
+dictionary-muodossa pickle tiedostoon.
 
 ## Asetukset / konfiguraatio
 Muutettavaksi tarkoitetut asetukset luetaan projektin juurihakemistossa sijaitsevasta

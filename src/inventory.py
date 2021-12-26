@@ -1,3 +1,21 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+#
+# Northlands is a 2D survival game inspired by games like Minecraft, Terriaria and Valheim
+# Copyright (C) 2021 Oskari Ylönen [oskari@ylonen.org]
+#
+# This program is free software: you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of  MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with
+# this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import pygame
 from resources import ITEMS, CRAFTING_REQUIREMENTS, select_arrow
 from settings import CENTER, TILE_SIZE, GRAY, WHITE, BLACK, BROWN, RED
@@ -271,6 +289,10 @@ class Inventory():
                 item[3] = False
 
     def drop_item(self, world, player, item, amount):
+        """
+        Throws a given amount of an item towards the direction the player is facing.
+        Removes the item(s) from the inventory and spawns a drop object.
+        """
         if self.in_inventory(item, amount):
             self.remove_item(item, amount)
             if player.invert:

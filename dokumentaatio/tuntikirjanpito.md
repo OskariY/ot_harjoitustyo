@@ -22,4 +22,5 @@
 | 21.12 | 4    | koodin siivousta, dokumentaatiota ja buginkorjausta |
 | 22.12 | 2    | jousipyssyn ja nuolien lisääminen, pieniä muutoksia crafting-järjestelmään |
 | 23.12 | 2    | luurankovihollisen lisäys ja mob spawnien optimointia |
+| 26.12 | 4    | testejä, dokumentaatiota ja optimointia |
 | yht   | 70   | |

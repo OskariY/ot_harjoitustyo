@@ -3,20 +3,24 @@ Maailma on satunnaisesti generoitu, joten jokainen maailma on erilainen. Maan p�
 hetkellä kahdenlaisia biomeita. Toinen on leuto metsäbiomi ja toinen on vaarallinen tundrabiomi.
 Näistä vain tundrabiomille ilmestyy vihollisia. Maan alla on luolastoja, joista löytyy hiiltä
 ja luolamatoja. Uusi maailma alkaa aina aamusta, mutta vuorokausi kiertää tässä versiossa varsin
-nopeasti. Yöllä ilmestyy suuria määriä zombeja.
+nopeasti. Yöllä ilmestyy zombeja ja luurankoja.
 
 # Viholliset
 ### Karhu
 Ilmestyy tundrabiomille ja kävelee pelaajaa päin tehden vahinkoa.
 
 ### Zombie
-Ilmestyy yöllä suurissa määrissä, vastaa käytökseltään karhua
+Ilmestyy yöllä, vastaa käytökseltään karhua
+
+### Luuranko
+Ilmestyy yöllä. Pyrkii pitämään pelaajaan pientä etäisyyttä ja ampuu tätä nuolilla.
 
 ### Lintu
 Ilmestyy tundrabiomille ja lentää pelaajaa päin tehden vahinkoa.
 
 ### Luolamato
-Ilmestyy, kun pelaaja on maan alla. Pystyy menemään seinien läpi.
+Ilmestyy, kun pelaaja on maan alla. Pystyy menemään seinien läpi. Pakenee maan alle kun pelaaja
+poistuu luolabiomilta.
 
 # Kontrollit
 a: liiku vasemmalle
@@ -43,6 +47,10 @@ F9: luo ja lataa maailman "test", hyödyllinen maailman generoinnin testaamiseen
 Kaikilla työkaluilla voi löydä vihollisia. Valitse kirves, hakku tai lapio hotbarissa ja klikkaa
 vasemmalla hiiren napilla osoittaen kursorilla jotain vihollista. Voit myös tehdä jousen ja
 nuolia ja ampua sillä vihollisia.
+
+# Syöminen
+Elämäpisteitä saa takaisin syömällä lihaa. Joka tapahtuu valitsemalla liha ja painamalla hiiren
+vasenta näppäintä.
 
 # Rakentaminen
 Valitse hotbarista joku esine, jolla voi rakentaa (mm. mikä tahansa palikka), osoita kursori

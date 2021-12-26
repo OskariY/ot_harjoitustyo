@@ -1,3 +1,21 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+#
+# Northlands is a 2D survival game inspired by games like Minecraft, Terriaria and Valheim
+# Copyright (C) 2021 Oskari Ylönen [oskari@ylonen.org]
+#
+# This program is free software: you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of  MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with
+# this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import math
 import pygame
 from numpy import random
@@ -121,9 +139,12 @@ class WalkingMob():
         # aggro to player
         if self.rect.right > world.scrollx or self.rect.left < DISPLAY_WIDTH + world.scrollx:
             self.aggroed = True
-        self._move(player, world)
+        self.move(player, world)
 
-    def shoot(self, world, x, y):
+    def shoot(self, world, x, y): # pragma: no cover
+        """
+        Shoot an arrow towards (x, y)
+        """
         distance_x = x - self.rect.x
         distance_y = y - self.rect.y - abs(distance_x)//3
 
@@ -133,7 +154,10 @@ class WalkingMob():
         arrow = Arrow(self.rect.centerx, self.rect.centery, speed_x, speed_y, True)
         world.arrows.append(arrow)
 
-    def _move(self, player, world):
+    def move(self, player, world):
+        """
+        Moves towards the x coordinate of the player and jumps when encountering obsticles.
+        """
         # movement
         if self.mobtype == "skeleton":
             target_offset = TILE_SIZE * 5

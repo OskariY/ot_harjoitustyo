@@ -1,3 +1,21 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+#
+# Northlands is a 2D survival game inspired by games like Minecraft, Terriaria and Valheim
+# Copyright (C) 2021 Oskari Ylönen [oskari@ylonen.org]
+#
+# This program is free software: you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of  MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with
+# this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import math
 import pygame
 from settings import TILE_SIZE
@@ -7,6 +25,9 @@ from entities.fadingtext import FadingText
 from functions import move, draw_health_bar
 
 class Player():
+    """
+    Player object moved by the user
+    """
     def __init__(self, x, y):
         self.rect = pygame.Rect(x, y, TILE_SIZE, 2*TILE_SIZE)
         self.hitrect = pygame.Rect(x, y, 2*TILE_SIZE, 2*TILE_SIZE)
@@ -96,7 +117,7 @@ class Player():
             if hit:
                 worm.health -= 5
 
-    def _move(self, world):
+    def move(self, world):
         if not self.moving_right and not self.moving_left:
             if self.dx > 0:
                 self.dx -= 1
@@ -150,7 +171,8 @@ class Player():
                     self.rect.bottom = world.slabs[slab_collide].y
                     self.falling = False
                 else:
-                    move(self, world, True, True)
+                    if self.dx != 0 or self.dy != 0:
+                        move(self, world, True, True)
         else:
             move(self, world, True)
 
@@ -183,10 +205,10 @@ class Player():
             self.rect.y = -100
             self.health = self.max_health
 
-        self._move(world)
-        self._animation()
+        self.move(world)
+        self.animation()
 
-    def _animation(self): # pragma: no cover
+    def animation(self): # pragma: no cover
         """
         changes the player images to create the appearence of a running animation
         """

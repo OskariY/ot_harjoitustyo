@@ -1,5 +1,5 @@
 {
-    "fullscreen": true,
+    "fullscreen": false,
     "windowed_width": 1600,
     "windowed_height": 900,
     "music": true,

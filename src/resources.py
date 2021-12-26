@@ -1,3 +1,25 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+#
+# Northlands is a 2D survival game inspired by games like Minecraft, Terriaria and Valheim
+# Copyright (C) 2021 Oskari Ylönen [oskari@ylonen.org]
+#
+# This program is free software: you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of  MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with
+# this program.  If not, see <http://www.gnu.org/licenses/>.
+"""
+This file loads all the required images and sounds to memory as well as containing
+the ITEMS index dictionary and "recepies" for crafing
+"""
+
 import random
 import os
 import pygame

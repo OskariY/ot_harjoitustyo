@@ -1,3 +1,21 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+#
+# Northlands is a 2D survival game inspired by games like Minecraft, Terriaria and Valheim
+# Copyright (C) 2021 Oskari Ylönen [oskari@ylonen.org]
+#
+# This program is free software: you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of  MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with
+# this program.  If not, see <http://www.gnu.org/licenses/>
+
 import math
 import noise
 import random
@@ -101,7 +119,7 @@ class Worm():
         """
         # despawn if player is too far
         if abs(player.rect.x - self.head_rect.x) > 500 \
-                and abs(player.rect.y - self.head_rect.y) > 500:
+                or abs(player.rect.y - self.head_rect.y) > 500:
             world.worms.remove(self)
         # death
         if self.health <= 0:

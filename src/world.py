@@ -1,3 +1,21 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+#
+# Northlands is a 2D survival game inspired by games like Minecraft, Terriaria and Valheim
+# Copyright (C) 2021 Oskari Ylönen [oskari@ylonen.org]
+#
+# This program is free software: you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of  MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with
+# this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import noise
 import time
 import pygame
@@ -69,7 +87,7 @@ class World():
     def spawn_mobs(self, target_chunk, player):
         target_x, target_y = (int(i) for i in target_chunk.split(";"))
         if len(self.mobs) < MOB_LIMIT:
-            rng = random.randint(1, 3000)
+            rng = random.randint(1, 30000)
 
             # caveworm spawns
             if self.game_map[target_chunk][1] == 3 and rng == 1 and self.current_biome == 3:
@@ -81,7 +99,7 @@ class World():
             # bird spawns
             if len(self.game_map[target_chunk][0]) == 0 and \
                     self.game_map[target_chunk][1] == 2:
-                if rng == 2:
+                if rng in range(2, 10):
                     bird = FlyingMob(target_x*TILE_SIZE*CHUNK_SIZE,
                                      target_y*TILE_SIZE*CHUNK_SIZE)
                     self.mobs.append(bird)
@@ -91,12 +109,12 @@ class World():
                     self.game_map[target_chunk][1] != 3:
                 mobtype = ""
                 if self.is_night:
-                    if rng == 4:
+                    if rng in range(10, 20):
                         mobtype = "zombie"
-                    elif rng == 5:
+                    elif rng in range(20, 30):
                         mobtype = "skeleton"
                 else:
-                    if rng == 6 and self.game_map[target_chunk][1] == 2:
+                    if rng in range(30, 40) and self.game_map[target_chunk][1] == 2:
                         mobtype = "bear"
                 if mobtype != "":
                     tile = self.game_map[target_chunk][0][0] # take the first tile in the chunk

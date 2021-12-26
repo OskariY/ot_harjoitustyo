@@ -63,8 +63,10 @@ poetry run invoke coverage-report
 
 Raportti generoituu htmlcov-hakemistoon.
 
-### Tiedetyt bugit
+### Known Issues
 
-- peli lyö välillä mysteerisiä "None" nimisiä kopioita maailmoista
+- peli luo välillä mysteerisiä "None" nimisiä kopioita maailmoista
 
 - slabien fysiikat ovat bugiset
+
+- fps tippuu välillä rankasti, tämä johtuu varmaan osittain itse ohjelmointikielestä ja pelin laajuudesta
