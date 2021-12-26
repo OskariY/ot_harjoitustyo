@@ -25,6 +25,8 @@ Peli on kirjoitettu Pythonilla ja toteutettu käyttäen pygame-grafiikkakirjasto
 [viikko 6 release](https://github.com/yoskari/ot_harjoitustyo/releases/tag/viikko6)
  ( bugi: peli pitää ajaa kerran ennen testausta )
 
+[loppupalautus](https://github.com/yoskari/ot_harjoitustyo/releases/tag/loppupalautus)
+
 ## Asennus
 1. Asenna riippuvuudet komennolla:
 
